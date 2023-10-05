@@ -29,9 +29,9 @@ class Command(BaseCommand):
 
                     teacher = Teacher(
                         repository_id=teacher_id,
-                        dblp_id=teacher_data["dblp_id"],
+                        dblp_id=teacher_data.get("dblp_id", None),
                         name=teacher_data["nombre"],
-                        external_name=teacher_data.get("nombre_externo", ""),
+                        external_name=teacher_data.get("nombre_externo", None),
                     )
                     teacher.save()
 

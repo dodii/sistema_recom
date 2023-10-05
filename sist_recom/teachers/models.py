@@ -7,13 +7,13 @@ from django.contrib.postgres.fields import ArrayField
 
 class Teacher(models.Model):
     repository_id = models.IntegerField()
-    dblp_id = models.CharField(blank=True, null=True)
+    dblp_id = models.CharField(max_length=200, blank=True, null=True)
     name = models.CharField(max_length=200)
     external_name = models.CharField(max_length=200, blank=True, null=True)
 
     openalex_id = models.CharField(blank=True, null=True)
     openalex_works_url = models.URLField(blank=True, null=True)
-    # concepts = ArrayField(models.CharField(max_length=200))
+    concepts = ArrayField(models.CharField(max_length=200), null=True, blank=True)
 
     def __str__(self):
         return f"{self.name}".strip()
@@ -31,6 +31,7 @@ class AbstractTeacherWork(models.Model):
     title = models.CharField(max_length=1000)
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
     year = models.PositiveSmallIntegerField(blank=True, null=True)
+    doi = models.CharField(max_length=500, blank=True, null=True)
 
     def __str__(self):
         return str(self.title) + " de " + str(self.teacher)

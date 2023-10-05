@@ -59,6 +59,12 @@ def get_openalex_works_of_teacher(works_api_url):
     # Seleccionamos el máximo de trabajos que openalex puede mostrar por página.
     # Es posible pedirlos TODOS pero por ahora no es necesario, son muy pocos
     # los investigadores que tienen tantos trabajos guardados por OpenAlex.
-    works_response = requests.get(works_api_url + f"&per-page={per_page_works}").json()
+    response = requests.get(works_api_url + f"&per-page={per_page_works}")
 
-    return works_response
+    try:
+        response.raise_for_status()
+
+    except requests.exceptions.HTTPError as e:
+        print(e.response.text)
+
+    return response.json()

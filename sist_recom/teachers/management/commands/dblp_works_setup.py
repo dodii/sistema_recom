@@ -15,7 +15,7 @@ class Command(BaseCommand):
         # Hacemos query a la tabla que contiene los docentes en la DB.
         # Deben tener id en dblp. Los que no tienen, venían con el string vacío
         # desde el repositorio.
-        teachers = Teacher.objects.exclude(dblp_id="")
+        teachers = Teacher.objects.exclude(dblp_id=None)
         for teacher in teachers:
             try:
                 # Esto devuelve la lista [{'article': ...}], donde estan todos los
@@ -40,6 +40,7 @@ class Command(BaseCommand):
                             title=work[key]["title"],
                             teacher=teacher,
                             year=work[key]["year"],
+                            doi=work[key].get("ee", ""),
                         )
                         dblp_work.save()
 
