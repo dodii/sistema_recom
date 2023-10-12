@@ -9,7 +9,7 @@ from teachers.teacher_data_extraction.academic_repository import (
 
 
 class Command(BaseCommand):
-    help = "Llamado a la API del repositorio de docentes para poblar la base de datos del sistema de recomendación"
+    help = "Llamado a la API del repositorio de docentes para poblar la base de datos del sistema de recomendación."
 
     def handle(self, *args, **options):
         try:

@@ -28,8 +28,8 @@ Los trabajos están en otro endpoint. Se accede a ellos con el campo works_api_u
 """
 
 
-def get_openalex_teacher_data(teacher_display_name):
-    api_query = f"{openalex_api}authors?search={teacher_display_name}"
+def get_openalex_teacher_data(teacher_id):
+    api_query = f"{openalex_api}authors/{teacher_id}"
     response = requests.get(api_query)
 
     # Se hace la request
