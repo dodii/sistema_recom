@@ -6,6 +6,9 @@ __pycache__
 db.sqlite3
 media
 
+# OpenAlex model
+/sist_recom/teachers/openalex_extractor/model_files
+
 # Backup files # 
 *.bak 
 
