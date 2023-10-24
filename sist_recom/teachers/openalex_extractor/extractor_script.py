@@ -149,6 +149,17 @@ def cut_length(data, seq_len=512):
     return data[:seq_len]
 
 
+def convert_input_format(raw_input):
+    # title = title
+    # abstract = resumen
+    # inverted_abstract = false
+    # journal = null
+    # doc_type = null
+
+    # devolver un json
+    pass
+
+
 def transformation(json_input):
     # Get input JSON data and convert it to a DF
     input_json = json.dumps(json_input)

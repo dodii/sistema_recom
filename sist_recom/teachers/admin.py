@@ -1,20 +1,25 @@
 from django.contrib import admin
-from .models import Teacher, DBLPWork, OpenAlexWork, TeacherWorkKeyword, TeacherKeyword
+from .models import (
+    Teacher,
+    OpenAlexWork,
+    TeacherWorkKeyword,
+    TeacherKeyword,
+    TeacherCourse,
+    TeacherCourseKeyword,
+    GuidedThesis,
+    GuidedThesisKeyword,
+)
 from django.contrib.auth.models import User, Group
 
 
 class TeacherAdmin(admin.ModelAdmin):
     search_fields = ["name"]
     search_help_text = "Buscar por nombre"
-    list_display = ["name", "dblp_id", "openalex_id", "get_keywords"]
+    list_display = ["name", "openalex_id", "get_keywords"]
 
     @admin.display(description="keywords")
     def get_keywords(self, obj):
         return [keyword.keyword for keyword in obj.teacherkeyword_set.all()]
-
-
-class DBLPWorkAdmin(admin.ModelAdmin):
-    pass
 
 
 class OpenAlexWorkAdmin(admin.ModelAdmin):
@@ -56,10 +61,13 @@ class TeacherKeywordAdmin(admin.ModelAdmin):
 
 # Register your models here.
 admin.site.register(Teacher, TeacherAdmin)
-admin.site.register(DBLPWork, DBLPWorkAdmin)
 admin.site.register(OpenAlexWork, OpenAlexWorkAdmin)
 admin.site.register(TeacherWorkKeyword, TeacherWorkKeywordAdmin)
 admin.site.register(TeacherKeyword, TeacherKeywordAdmin)
+admin.site.register(TeacherCourse)
+admin.site.register(TeacherCourseKeyword)
+admin.site.register(GuidedThesis)
+admin.site.register(GuidedThesisKeyword)
 
 # Unregister user and group
 admin.site.unregister(Group)

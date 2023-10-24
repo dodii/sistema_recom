@@ -19,6 +19,9 @@ class Command(BaseCommand):
         with open("openalex_teachers_id.json") as f:
             ids_data = json.load(f)
 
+        with open("docentes_dcc.json") as f:
+            dcc_ucampus_data = json.load(f)
+
         try:
             teachers_dictionary = make_request_to_repository_api()
             self.stdout.write(
@@ -36,9 +39,9 @@ class Command(BaseCommand):
 
                     teacher = Teacher(
                         repository_id=teacher_id,
-                        dblp_id=teacher_data.get("dblp_id", None),
                         name=teacher_data["nombre"],
-                        external_name=teacher_data.get("nombre_externo", None),
+                        external_name=teacher_data.get("nombre_externo", ""),
+                        rut=teacher_data["rut"]
                     )
 
                     # Lectura del JSON de datos
@@ -81,6 +84,11 @@ class Command(BaseCommand):
                                 keyword.teacher.add(teacher)
 
                     teacher.save()
+
+                    # Ahora el rut los docentes de jornada completa y parcial, 
+                    # como identificador adicional para poder
+                    # trabajar con los datos de U-Campus
+                    teacher.rut = 
 
         except Exception as exc:
             self.stdout.write(
