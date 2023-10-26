@@ -16,8 +16,12 @@ class Command(BaseCommand):
 
             self.stdout.write(
                 self.style.SUCCESS(
-                    "Los modelos de traducción español-inglés se han descargado y guardado con éxito."
+                    "Los modelos de traducción español-inglés se han descargado y guardado con éxito. \n"
                 )
+            )
+
+            self.stdout.write(
+                self.style.SUCCESS("Se descargará el modelo de embeddings")
             )
             runpy.run_path(path_name="./teachers/transformers/embeddings_download.py")
 

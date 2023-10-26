@@ -17,7 +17,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # Se extraen los datos de los trabajos para cada docente con información en OpenAlex.
-        teachers = Teacher.objects.filter(openalex_works_url__isnull=False)
+        teachers = Teacher.objects.exclude(openalex_id="")
         for teacher in teachers:
             try:
                 # Ahora se obtendrán los trabajos a partir de la url.
@@ -57,7 +57,7 @@ class Command(BaseCommand):
                         work.teacher.add(teacher)
 
                     # Ahora se añaden las keywords al trabajo.
-                    # Solamente si el score es mayor a 0.
+                    # Solamente si el score es mayor a 20.
                     # Como los conceptos vienen de OpenAlex, su
                     # display_name es único.
                     for concept in result["concepts"]:
@@ -65,7 +65,7 @@ class Command(BaseCommand):
                         work = OpenAlexWork.objects.get(openalex_id=result["id"])
 
                         # Se filtran keywords que potencialmente estorben
-                        if concept["score"] > 0:
+                        if concept["score"] > 0.2:
                             # Si la keyword es nueva en la base de datos, se guarda
                             if not TeacherWorkKeyword.objects.filter(
                                 keyword=concept["display_name"]
@@ -83,6 +83,12 @@ class Command(BaseCommand):
                                     keyword=concept["display_name"]
                                 )
                                 keyword.associated_work.add(work)
+
+                self.stdout.write(
+                    self.style.SUCCESS(
+                        f"Añadidas las keywords de los trabajo(s) de {teacher.name} \n"
+                    )
+                )
 
             except Exception as exc:
                 self.stdout.write(

@@ -114,6 +114,7 @@
         "works_api_url": ""
     },
     "Ivana Bachmann E.": {
+        "rut": "18120263",
         "dblp_id": "175/1168",
         "oa_id": "A5053887016",
         "works_api_url": "https://api.openalex.org/works?filter=author.id:A5053887016"
@@ -137,247 +138,247 @@
         "works_api_url": ""
     },
     "José Saavedra": {
-        "rut": "",
+        "rut": "22462385",
         "dblp_id": "71/8484",
         "oa_id": "A5027890236",
         "works_api_url": "https://api.openalex.org/works?filter=author.id:A5027890236"
     },
     "María Cecilia Rivara": {
-        "rut": "",
+        "rut": "5816459",
         "dblp_id": "35/2294",
         "oa_id": "A5071584525",
         "works_api_url": "https://api.openalex.org/works?filter=author.id:A5071584525"
     },
     "José Miguel Piquer": {
-        "rut": "",
+        "rut": "7011105",
         "dblp_id": "51/2027",
         "oa_id": "A5030676522",
         "works_api_url": "https://api.openalex.org/works?filter=author.id:A5030676522"
     },
     "Daniel Perovich": {
-        "rut": "",
+        "rut": "22072009",
         "dblp_id": "41/5302",
         "oa_id": "A5073118748",
         "works_api_url": "https://api.openalex.org/works?filter=author.id:A5073118748"
     },
     "Andrés Muñoz": {
-        "rut": "",
+        "rut": "13252311",
         "dblp_id": "",
         "oa_id": "",
         "works_api_url": ""
     },
     "Luis Mateu": {
-        "rut": "",
+        "rut": "9449189",
         "dblp_id": "17/6340",
         "oa_id": "A5044932999",
         "works_api_url": "https://api.openalex.org/works?filter=author.id:A5044932999"
     },
     "Max Isakson": {
-        "rut": "",
+        "rut": "4184308",
         "dblp_id": "",
         "oa_id": "",
         "works_api_url": ""
     },
     "Patricio Inostroza": {
-        "rut": "",
+        "rut": "10420570",
         "dblp_id": "53/3461",
         "oa_id": "A5027193664",
         "works_api_url": "https://api.openalex.org/works?filter=author.id:A5027193664"
     },
     "César Guerrero": {
-        "rut": "",
+        "rut": "10268781",
         "dblp_id": "",
         "oa_id": "",
         "works_api_url": ""
     },
     "Pablo González": {
-        "rut": "",
+        "rut": "8124557",
         "dblp_id": "",
         "oa_id": "",
         "works_api_url": ""
     },
     "Dionisio González": {
-        "rut": "",
+        "rut": "11630075",
         "dblp_id": "167/1697",
         "oa_id": "A5053787327",
         "works_api_url": "https://api.openalex.org/works?filter=author.id:A5053787327"
     },
     "Eduardo Godoy": {
-        "rut": "",
+        "rut": "9675336",
         "dblp_id": "",
         "oa_id": "",
         "works_api_url": ""
     },
     "Marisa Ernst": {
-        "rut": "",
+        "rut": "8803922",
         "dblp_id": "",
         "oa_id": "",
         "works_api_url": ""
     },
     "Sandra De La Fuente": {
-        "rut": "",
+        "rut": "6409116",
         "dblp_id": "23/9446",
         "oa_id": "A5062090459",
         "works_api_url": "https://api.openalex.org/works?filter=author.id:A5062090459"
     },
     "Javier Bustos": {
-        "rut": "",
+        "rut": "13103768",
         "dblp_id": "26/1093",
         "oa_id": "A5062341453",
         "works_api_url": "https://api.openalex.org/works?filter=author.id:A5062341453"
     },
     "José Benguria": {
-        "rut": "",
+        "rut": "7936494",
         "dblp_id": "",
         "oa_id": "",
         "works_api_url": ""
     },
     "Tomás Barros": {
-        "rut": "",
+        "rut": "10582158",
         "dblp_id": "66/3266",
         "oa_id": "A5058415322",
         "works_api_url": "https://api.openalex.org/works?filter=author.id:A5058415322"
     },
     "Juan Manuel Barrios": {
-        "rut": "",
+        "rut": "13670911",
         "dblp_id": "19/7455",
         "oa_id": "A5050260698",
         "works_api_url": "https://api.openalex.org/works?filter=author.id:A5050260698"
     },
     "Ricardo Baeza-Yates": {
-        "rut": "",
+        "rut": "7040259",
         "dblp_id": "b/RABaezaYates",
         "oa_id": "A5076204770",
         "works_api_url": "https://api.openalex.org/works?filter=author.id:A5076204770"
     },
     "Juan Álvarez": {
-        "rut": "",
+        "rut": "6197211",
         "dblp_id": "",
         "oa_id": "",
         "works_api_url": ""
     },
     "Matías Toro": {
-        "rut": "",
+        "rut": "19039752",
         "dblp_id": "169/6836",
         "oa_id": "A5073103554",
         "works_api_url": "https://api.openalex.org/works?filter=author.id:A5073103554"
     },
     "Éric Tanter": {
-        "rut": "",
+        "rut": "14744633",
         "dblp_id": "t/EricTanter",
         "oa_id": "A5074606459",
         "works_api_url": "https://api.openalex.org/works?filter=author.id:A5074606459"
     },
     "Iván Sipirán": {
-        "rut": "",
+        "rut": "23145134",
         "dblp_id": "49/9218",
         "oa_id": "A5055991257",
         "works_api_url": "https://api.openalex.org/works?filter=author.id:A5055991257"
     },
     "Jocelyn Simmonds": {
-        "rut": "",
+        "rut": "10976043",
         "dblp_id": "33/3098",
         "oa_id": "A5035748271",
         "works_api_url": "https://api.openalex.org/works?filter=author.id:A5035748271"
     },
     "Patricio Poblete": {
-        "rut": "",
+        "rut": "6517553",
         "dblp_id": "28/1091",
         "oa_id": "A5086393653",
         "works_api_url": "https://api.openalex.org/works?filter=author.id:A5086393653"
     },
     "Bárbara Poblete": {
-        "rut": "",
+        "rut": "9587752",
         "dblp_id": "83/6509",
         "oa_id": "A5009958753",
         "works_api_url": "https://api.openalex.org/works?filter=author.id:A5009958753"
     },
     "Federico Olmedo": {
-        "rut": "",
+        "rut": "25799142",
         "dblp_id": "79/7397",
         "oa_id": "A5009421242",
         "works_api_url": "https://api.openalex.org/works?filter=author.id:A5009421242"
     },
     "Sergio Ochoa": {
-        "rut": "",
+        "rut": "14650629",
         "dblp_id": "58/3679",
         "oa_id": "A5076957708",
         "works_api_url": "https://api.openalex.org/works?filter=author.id:A5076957708"
     },
     "Gonzalo Navarro": {
-        "rut": "",
+        "rut": "14610732",
         "dblp_id": "n/GonzaloNavarro",
         "oa_id": "A5080743153",
         "works_api_url": "https://api.openalex.org/works?filter=author.id:A5080743153"
     },
     "Aidan Hogan": {
-        "rut": "",
+        "rut": "24482054",
         "dblp_id": "h/AidanHogan",
         "oa_id": "A5070504151",
         "works_api_url": "https://api.openalex.org/works?filter=author.id:A5070504151"
     },
     "Nancy Hitschfeld": {
-        "rut": "",
+        "rut": "8108326",
         "dblp_id": "h/NancyHitschfeldKahler",
         "oa_id": "A5085139932",
         "works_api_url": "https://api.openalex.org/works?filter=author.id:A5085139932"
     },
     "Alejandro Hevia": {
-        "rut": "",
+        "rut": "8455175",
         "dblp_id": "h/AlejandroHevia",
         "oa_id": "A5038522301",
         "works_api_url": "https://api.openalex.org/works?filter=author.id:A5038522301"
     },
     "Francisco J. Gutiérrez": {
-        "rut": "",
+        "rut": "16657649",
         "dblp_id": "161/3505",
         "oa_id": "A5057709474",
         "works_api_url": "https://api.openalex.org/works?filter=author.id:A5057709474"
     },
     "Claudio Gutiérrez": {
-        "rut": "",
+        "rut": "7171657",
         "dblp_id": "g/ClaudioGutierrez",
         "oa_id": "A5041698136",
         "works_api_url": "https://api.openalex.org/works?filter=author.id:A5041698136"
     },
     "Eduardo Graells-Garrido": {
-        "rut": "",
+        "rut": "15332121",
         "dblp_id": "132/8956",
         "oa_id": "A5034682188",
         "works_api_url": "https://api.openalex.org/works?filter=author.id:A5034682188"
     },
     "Benjamín Bustos": {
-        "rut": "",
+        "rut": "13271569",
         "dblp_id": "15/5056",
         "oa_id": "A5009309241",
         "works_api_url": "https://api.openalex.org/works?filter=author.id:A5009309241"
     },
     "Felipe Bravo Márquez": {
-        "rut": "",
+        "rut": "15639963",
         "dblp_id": "04/8612",
         "oa_id": "A5047767877",
         "works_api_url": "https://api.openalex.org/works?filter=author.id:A5047767877"
     },
     "María Cecilia Bastarrica": {
-        "rut": "",
+        "rut": "14555388",
         "dblp_id": "b/MCeciliaBastarrica",
         "oa_id": "A5039952062",
         "works_api_url": "https://api.openalex.org/works?filter=author.id:A5039952062"
     },
     "Jérémy Barbay": {
-        "rut": "",
+        "rut": "22719533",
         "dblp_id": "56/5867",
         "oa_id": "A5079691449",
         "works_api_url": "https://api.openalex.org/works?filter=author.id:A5079691449"
     },
     "Nelson Baloian": {
-        "rut": "",
+        "rut": "6941197",
         "dblp_id": "b/NelsonBaloian",
         "oa_id": "A5036129923",
         "works_api_url": "https://api.openalex.org/works?filter=author.id:A5036129923"
     },
     "Andrés Abeliuk": {
-        "rut": "",
+        "rut": "16365691",
         "dblp_id": "118/6644",
         "oa_id": "A5038897083",
         "works_api_url": "https://api.openalex.org/works?filter=author.id:A5038897083"
