@@ -59,14 +59,38 @@ class TeacherKeywordAdmin(admin.ModelAdmin):
         return [teacher.name for teacher in obj.teacher.all()]
 
 
+class GuidedThesisAdmin(admin.ModelAdmin):
+    search_fields = ["title", "year", "teacher__name"]
+    search_help_text = "Buscar por título, año o docente"
+    list_display = ["title", "year", "get_teachers"]
+    filter_horizontal = ("teacher",)
+    exclude = ("doi",)
+
+    @admin.display(description="teachers")
+    def get_teachers(self, obj):
+        return [teacher.name for teacher in obj.teacher.all()]
+
+
+class TeacherCoursedAdmin(admin.ModelAdmin):
+    search_fields = ["title", "course_code", "year", "teacher__name"]
+    search_help_text = "Buscar por título, código, año o docente"
+    list_display = ["title", "course_code", "year", "get_teachers"]
+    filter_horizontal = ("teacher",)
+    exclude = ("doi",)
+
+    @admin.display(description="teachers")
+    def get_teachers(self, obj):
+        return [teacher.name for teacher in obj.teacher.all()]
+
+
 # Register your models here.
 admin.site.register(Teacher, TeacherAdmin)
 admin.site.register(OpenAlexWork, OpenAlexWorkAdmin)
 admin.site.register(TeacherWorkKeyword, TeacherWorkKeywordAdmin)
 admin.site.register(TeacherKeyword, TeacherKeywordAdmin)
-admin.site.register(TeacherCourse)
+admin.site.register(TeacherCourse, TeacherCoursedAdmin)
 admin.site.register(TeacherCourseKeyword)
-admin.site.register(GuidedThesis)
+admin.site.register(GuidedThesis, GuidedThesisAdmin)
 admin.site.register(GuidedThesisKeyword)
 
 # Unregister user and group

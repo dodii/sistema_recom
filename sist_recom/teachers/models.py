@@ -43,16 +43,10 @@ class OpenAlexWork(AbstractTeacherWork):
 class GuidedThesis(AbstractTeacherWork):
     ucampus_id = models.CharField(max_length=100)
 
-    def __str__(self):
-        return f"{self.title} guiado por {self.teacher}"
-
 
 # Cursos dictados en la FCFM
 class TeacherCourse(AbstractTeacherWork):
     course_code = models.CharField(max_length=100)
-
-    def __str__(self):
-        return f"{self.title} dictado por {self.teacher}"
 
 
 # Es abstracta para poder ligarla a diferentes elementos como
@@ -85,7 +79,9 @@ class TeacherWorkKeyword(AbstractKeyword):
 
 class TeacherCourseKeyword(AbstractKeyword):
     associated_course = models.ManyToManyField(TeacherCourse)
+    course_code = models.CharField(max_length=100)
 
 
 class GuidedThesisKeyword(AbstractKeyword):
     associated_thesis = models.ManyToManyField(GuidedThesis)
+    ucampus_code = models.CharField(max_length=100)

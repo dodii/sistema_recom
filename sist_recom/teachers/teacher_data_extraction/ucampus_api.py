@@ -9,7 +9,9 @@ url_persona = f"https://{UCAMPUS_USER}:{UCAMPUS_PASSWORD}@ucampus.uchile.cl/api/
 
 
 """
-Esta función...
+Esta función obtiene todos los elementos relacionados al trabajo de cada docente.
+Entre estos hay publicaciones, memorias, cursos, etc.
+
 """
 
 
@@ -18,8 +20,9 @@ def get_person_info(rut):
     try:
         response = requests.get(url_persona + rut, verify=True)
         response.raise_for_status()
+        data = response.json()
 
     except requests.exceptions.HTTPError as e:
-        print(e.response.text)
+        print(e.response.text)  # type: ignore
 
     return data
