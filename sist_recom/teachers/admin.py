@@ -15,11 +15,31 @@ from django.contrib.auth.models import User, Group
 class TeacherAdmin(admin.ModelAdmin):
     search_fields = ["name"]
     search_help_text = "Buscar por nombre"
-    list_display = ["name", "openalex_id", "get_keywords"]
+    list_display = [
+        "name",
+        "openalex_id",
+        "get_keywords",
+        "get_courses",
+        "get_memories",
+    ]
 
     @admin.display(description="keywords")
     def get_keywords(self, obj):
         return [keyword.keyword for keyword in obj.teacherkeyword_set.all()]
+
+    @admin.display(description="courses")
+    def get_courses(self, obj):
+        return [
+            f"{course.course_code} {course.title}"
+            for course in obj.teachercourse_set.all()
+        ]
+
+    @admin.display(description="thesis")
+    def get_memories(self, obj):
+        return [
+            f"{thesis.ucampus_id}, {thesis.title}"
+            for thesis in obj.guidedthesis_set.all()
+        ]
 
 
 class OpenAlexWorkAdmin(admin.ModelAdmin):
