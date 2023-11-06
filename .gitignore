@@ -8,6 +8,7 @@ media
 
 # OpenAlex model
 /sist_recom/teachers/openalex_extractor/model_files
+/sist_recom/teachers/openalex_extractor/model_files.zip
 
 # Backup files # 
 *.bak 

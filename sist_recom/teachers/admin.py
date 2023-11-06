@@ -30,14 +30,14 @@ class TeacherAdmin(admin.ModelAdmin):
     @admin.display(description="courses")
     def get_courses(self, obj):
         return [
-            f"{course.course_code} {course.title}"
+            f"{course.course_code}: {course.title}"
             for course in obj.teachercourse_set.all()
         ]
 
     @admin.display(description="thesis")
     def get_memories(self, obj):
         return [
-            f"{thesis.ucampus_id}, {thesis.title}"
+            f"{thesis.ucampus_id}: {thesis.title}"
             for thesis in obj.guidedthesis_set.all()
         ]
 
