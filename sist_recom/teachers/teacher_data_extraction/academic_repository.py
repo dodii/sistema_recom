@@ -1,6 +1,5 @@
 import requests
-import xmltodict
-import json
+
 
 # Aquí va la conexión al repositorio de académicos que construyó Ignacio.
 
@@ -40,6 +39,6 @@ def make_request_to_repository_api():
                 teachers[teacher["id"]] = teacher  # Los guardamos por su id
 
     except requests.exceptions.HTTPError as e:
-        print(e.response.text)
+        print(e.response.text)  # type: ignore
 
     return teachers

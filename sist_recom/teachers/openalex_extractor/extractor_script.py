@@ -9,6 +9,8 @@ import tensorflow as tf
 
 model_path = "teachers/openalex_extractor/model_files/"
 
+print(os.path.join(os.getcwd() + f"/{model_path}", "model"))
+
 # Load the dictionaries
 with open(model_path + "topics_vocab.pkl", "rb") as f:
     target_vocab = pickle.load(f)
@@ -48,14 +50,23 @@ with open(model_path + "tag_id_vocab.pkl", "rb") as f:
 
 print("Loaded tag ID vocab")
 
-
 encoding_layer = tf.keras.layers.experimental.preprocessing.CategoryEncoding(
     num_tokens=len(target_vocab) + 1, output_mode="binary", sparse=False
 )
 
+# encoding_layer = tf.keras.layers.CategoryEncoding(
+#     num_tokens=len(target_vocab) + 1, output_mode="binary"
+# )
+
+print("Encoding layer set up")
+
 # Load the model components
-raw_model = tf.keras.models.load_model(os.path.join(model_path, "model"), compile=False)
-raw_model.trainable = False  # type: ignore
+raw_model = tf.keras.models.load_model(model_path + "model", compile=False)
+raw_model.trainable = False
+
+# # Load the model components
+# raw_model = tf.saved_model.load(model_path + "model")
+# raw_model.trainable = False
 
 print("Loaded raw model")
 
@@ -149,20 +160,28 @@ def cut_length(data, seq_len=512):
     return data[:seq_len]
 
 
+# Convierte el texto plano dado por el usuario en el input adecuado
+# para el modelo de extracción de conceptos.
 def convert_input_format(raw_input):
     # title = title
     # abstract = resumen
     # inverted_abstract = false
     # journal = null
     # doc_type = null
+    output = {
+        "title": raw_input,
+        "abtract": None,
+        "inverted_abstract": False,
+        "journal": None,
+        "doc_type": None,
+    }
 
-    # devolver un json
-    pass
+    return output
 
 
-def transformation(json_input):
+def transformation(dict_input):
     # Get input JSON data and convert it to a DF
-    input_json = json.dumps(json_input)
+    input_json = json.dumps(dict_input)
     input_df = pd.read_json(input_json, orient="records").reset_index()
 
     # Tokenize data

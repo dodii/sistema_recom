@@ -1,11 +1,11 @@
 from django.contrib import admin
 from .models import (
     Teacher,
-    OpenAlexWork,
-    TeacherWorkKeyword,
+    OpenAlexScholarWork,
+    TeacherScholarWorkKeyword,
     TeacherKeyword,
-    TeacherCourse,
-    TeacherCourseKeyword,
+    FCFMCourse,
+    # FCFMCourseKeyword,
     GuidedThesis,
     GuidedThesisKeyword,
 )
@@ -18,6 +18,7 @@ class TeacherAdmin(admin.ModelAdmin):
     list_display = [
         "name",
         "openalex_id",
+        "dblp_id",
         "get_keywords",
         "get_courses",
         "get_memories",
@@ -31,7 +32,7 @@ class TeacherAdmin(admin.ModelAdmin):
     def get_courses(self, obj):
         return [
             f"{course.course_code}: {course.title}"
-            for course in obj.teachercourse_set.all()
+            for course in obj.fcfmcourse_set.all()
         ]
 
     @admin.display(description="thesis")
@@ -42,7 +43,7 @@ class TeacherAdmin(admin.ModelAdmin):
         ]
 
 
-class OpenAlexWorkAdmin(admin.ModelAdmin):
+class OpenAlexScholarWorkAdmin(admin.ModelAdmin):
     search_fields = ["title", "teacher__name"]
     search_help_text = "Buscar por título o docente"
     list_display = ["title", "year", "get_teachers", "get_keywords"]
@@ -54,10 +55,10 @@ class OpenAlexWorkAdmin(admin.ModelAdmin):
 
     @admin.display(description="keywords")
     def get_keywords(self, obj):
-        return [keyword.keyword for keyword in obj.teacherworkkeyword_set.all()]
+        return [keyword.keyword for keyword in obj.teacherscholarworkkeyword_set.all()]
 
 
-class TeacherWorkKeywordAdmin(admin.ModelAdmin):
+class TeacherScholarWorkKeywordAdmin(admin.ModelAdmin):
     search_fields = ["keyword", "associated_work__title"]
     search_help_text = "Buscar por keyword o título de trabajo"
     list_display = ["keyword", "get_works"]
@@ -80,9 +81,9 @@ class TeacherKeywordAdmin(admin.ModelAdmin):
 
 
 class GuidedThesisAdmin(admin.ModelAdmin):
-    search_fields = ["title", "year", "teacher__name"]
+    search_fields = ["title", "year", "ucampus_id", "teacher__name"]
     search_help_text = "Buscar por título, año o docente"
-    list_display = ["title", "year", "get_teachers"]
+    list_display = ["title", "ucampus_id", "year", "get_teachers"]
     filter_horizontal = ("teacher",)
     exclude = ("doi",)
 
@@ -91,7 +92,7 @@ class GuidedThesisAdmin(admin.ModelAdmin):
         return [teacher.name for teacher in obj.teacher.all()]
 
 
-class TeacherCoursedAdmin(admin.ModelAdmin):
+class FCFMCoursedAdmin(admin.ModelAdmin):
     search_fields = ["title", "course_code", "year", "teacher__name"]
     search_help_text = "Buscar por título, código, año o docente"
     list_display = ["title", "course_code", "year", "get_teachers"]
@@ -105,11 +106,11 @@ class TeacherCoursedAdmin(admin.ModelAdmin):
 
 # Register your models here.
 admin.site.register(Teacher, TeacherAdmin)
-admin.site.register(OpenAlexWork, OpenAlexWorkAdmin)
-admin.site.register(TeacherWorkKeyword, TeacherWorkKeywordAdmin)
+admin.site.register(OpenAlexScholarWork, OpenAlexScholarWorkAdmin)
+admin.site.register(TeacherScholarWorkKeyword, TeacherScholarWorkKeywordAdmin)
 admin.site.register(TeacherKeyword, TeacherKeywordAdmin)
-admin.site.register(TeacherCourse, TeacherCoursedAdmin)
-admin.site.register(TeacherCourseKeyword)
+admin.site.register(FCFMCourse, FCFMCoursedAdmin)
+# admin.site.register(FCFMCourseKeyword)
 admin.site.register(GuidedThesis, GuidedThesisAdmin)
 admin.site.register(GuidedThesisKeyword)
 

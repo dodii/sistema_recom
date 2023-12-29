@@ -4,6 +4,7 @@ from sentence_transformers import SentenceTransformer
 
 paraph_multiling = "paraphrase-multilingual-mpnet-base-v2"
 
+# El modelo debería quedar en el caché para su posterior reutilización.
 model = SentenceTransformer(paraph_multiling)
 
 
@@ -24,9 +25,13 @@ def teacher_similarity_calculator(embedding, top_n):
     return selected_kw
 
 
-def works_similarity_calculator(embedding):
+def scholarworks_similarity_calculator(embedding):
     pass
 
 
-def guided_thesis_similarity_calculator(embedding):
+def guidedthesis_similarity_calculator(embedding):
+    pass
+
+
+def fcfmcourses_similarity_calculator(embedding):
     pass

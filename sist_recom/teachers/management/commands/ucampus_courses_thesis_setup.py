@@ -2,20 +2,32 @@
 # con los docentes actuales.
 
 from django.core.management.base import BaseCommand, CommandParser
-from teachers.models import Teacher, TeacherCourse, GuidedThesis
+from teachers.models import Teacher, FCFMCourse, GuidedThesis
 from teachers.teacher_data_extraction.ucampus_api import (
     get_person_info,
 )
+from teachers.transformers.embeddings_download import get_embeddings_of_model
 
 
 class Command(BaseCommand):
-    help = "Llamado a la API de U-Campus para extraer los cursos dictados y tesis/memorias donde han participado"
+    help = (
+        "Llamado a la API de U-Campus para extraer los cursos dictados y tesis/memorias donde han participado. "
+        "Este script puede tardar en comenzar su ejecución unos minutos al comienzo porque carga el modelo de embeddings."
+    )
 
     def add_arguments(self, parser: CommandParser) -> None:
         return super().add_arguments(parser)
 
     def handle(self, *args, **options):
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Añadiendo cursos y tesis/memorias de docentes desde U-Campus \n"
+            )
+        )
+
+        # La lista completa de docentes que se almacenan en la base de datos de esta aplicación.
         teachers = Teacher.objects.all()
+
         for teacher in teachers:
             try:
                 # Ahora se obtendrán los trabajos a partir de la url.
@@ -23,7 +35,7 @@ class Command(BaseCommand):
 
                 self.stdout.write(
                     self.style.SUCCESS(
-                        f"Respuesta de la API exitosa. Revisando memorias/tesis y cursos de {teacher.name} \n"
+                        f"Respuesta de U-Campus exitosa. Revisando memorias/tesis y cursos de {teacher.rut}: {teacher.name} \n"
                     )
                 )
 
@@ -31,10 +43,8 @@ class Command(BaseCommand):
                     data_result = teacher_works[result]
                     if data_result["tipo"] == "cursos_dictados":
                         # Si ya existe, solo añadimos el profe al curso
-                        if TeacherCourse.objects.filter(
-                            course_code=data_result["codigo"]
-                        ):
-                            course = TeacherCourse.objects.get(
+                        if FCFMCourse.objects.filter(course_code=data_result["codigo"]):
+                            course = FCFMCourse.objects.get(
                                 course_code=data_result["codigo"]
                             )
                             course.teacher.add(teacher)
@@ -47,10 +57,13 @@ class Command(BaseCommand):
 
                         # De lo contrario, creamos todo
                         else:
-                            course = TeacherCourse(
+                            course = FCFMCourse(
                                 title=data_result["nombre"],
                                 year=data_result["anno"],
                                 course_code=data_result["codigo"],
+                                embedding_name=get_embeddings_of_model(
+                                    data_result["nombre"]
+                                ),
                             )
                             course.save()
                             course.teacher.add(teacher)
@@ -73,6 +86,9 @@ class Command(BaseCommand):
                                 title=data_result["titulo"],
                                 year=data_result["anno"],
                                 ucampus_id=result,
+                                embedding_name=get_embeddings_of_model(
+                                    data_result["titulo"]
+                                ),
                             )
                             work.save()
                             work.teacher.add(teacher)
