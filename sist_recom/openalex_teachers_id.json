@@ -211,9 +211,9 @@
     },
     "11630075": {
         "alias": "Dionisio González",
-        "dblp_id": "167/1697",
-        "oa_id": "A5053787327",
-        "works_api_url": "https://api.openalex.org/works?filter=author.id:A5053787327"
+        "dblp_id": "",
+        "oa_id": "",
+        "works_api_url": ""
     },
     "9675336": {
         "alias": "Eduardo Godoy",
@@ -223,9 +223,9 @@
     },
     "6409116": {
         "alias": "Sandra De La Fuente",
-        "dblp_id": "23/9446",
-        "oa_id": "A5062090459",
-        "works_api_url": "https://api.openalex.org/works?filter=author.id:A5062090459"
+        "dblp_id": "",
+        "oa_id": "",
+        "works_api_url": ""
     },
     "13103768": {
         "alias": "Javier Bustos",

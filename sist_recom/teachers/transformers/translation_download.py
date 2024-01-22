@@ -6,6 +6,7 @@ model_es_en = AutoModelForSeq2SeqLM.from_pretrained(helsinki_es_en)
 tokenizer_es_en = AutoTokenizer.from_pretrained(helsinki_es_en)
 
 
+# Español a inglés
 def translate_es_en(text_input):
     encoded_input = tokenizer_es_en.encode(
         text_input, return_tensors="pt", padding=True, truncation=True
@@ -24,6 +25,7 @@ model_en_es = AutoModelForSeq2SeqLM.from_pretrained(helsinki_en_es)
 tokenizer_en_es = AutoTokenizer.from_pretrained(helsinki_en_es)
 
 
+# Inglés a español
 def translate_en_es(text_input):
     encoded_input = tokenizer_en_es.encode(
         text_input, return_tensors="pt", padding=True, truncation=True

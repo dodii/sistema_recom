@@ -1,25 +1,35 @@
 from django.db import models
-from pgvector.django import VectorField, HnswIndex
+from pgvector.django import VectorField
 
 # Create your models here.
 
 
+class Keyword(models.Model):
+    keyword = models.CharField(max_length=100, primary_key=True)
+    embedding = VectorField(dimensions=768, null=True, blank=True)
+
+    def __str__(self):
+        return self.keyword
+
+
 class Teacher(models.Model):
+    # El RUT viene de U-Campus
+    rut = models.CharField(max_length=50, primary_key=True)
     name = models.CharField(max_length=200)
     full_name = models.CharField(max_length=200, blank=True, null=True)
 
+    # datos que se recogen manualmente
     openalex_id = models.CharField(blank=True, null=True)
     openalex_works_url = models.URLField(blank=True, null=True)
     dblp_id = models.CharField(blank=True, null=True)
 
-    # El RUT viene de U-Campus
-    rut = models.CharField(max_length=50, primary_key=True)
+    keyword = models.ManyToManyField(Keyword, through="TeacherKeywordRelationship")
 
     def __str__(self):
         return f"{self.name}".strip()
 
 
-class AbstractTeacherWork(models.Model):
+class BaseTeacherWork(models.Model):
     class Meta:
         abstract = True
 
@@ -27,62 +37,67 @@ class AbstractTeacherWork(models.Model):
     teacher = models.ManyToManyField(Teacher)
     year = models.PositiveSmallIntegerField(blank=True, null=True)
 
-    embedding_name = VectorField(dimensions=768, null=True, blank=True)
+    embedding_name = VectorField(dimensions=768)
 
     def __str__(self):
-        return f"{self.title}"
+        return f"{self.title} ({self.year})"
 
 
 # Publicaciones
-class OpenAlexScholarWork(AbstractTeacherWork):
-    openalex_id = models.CharField(max_length=100)
+class ScholarWork(BaseTeacherWork):
+    keyword = models.ManyToManyField(Keyword, through="ScholarWorkKeywordRelationship")
+
+    openalex_id = models.CharField(max_length=100, primary_key=True)
     abstract = models.TextField(max_length=10000, blank=True, null=True)
     doi = models.CharField(max_length=500, blank=True, null=True)
 
 
-# Memorias, tesis de magíster y doctorado donde han participado
-class GuidedThesis(AbstractTeacherWork):
-    ucampus_id = models.CharField(max_length=100)
+# Memorias, tesis de magíster y doctorado que han guiado/co-guiado
+class GuidedThesis(BaseTeacherWork):
+    keyword = models.ManyToManyField(Keyword, through="GuidedThesisKeywordRelationship")
+    ucampus_id = models.CharField(max_length=100, primary_key=True)
 
 
 # Cursos dictados en la FCFM
-class FCFMCourse(AbstractTeacherWork):
-    course_code = models.CharField(max_length=100)
+class FCFMCourse(BaseTeacherWork):
+    keyword = models.ManyToManyField(Keyword, through="FCFMCourseKeywordRelationship")
+    course_code = models.CharField(max_length=100, primary_key=True)
+
+    def __str__(self):
+        return f"{self.course_code} - {self.title} ({self.year})"
 
 
-# Es abstracta para poder ligarla a diferentes elementos como
-# docentes, tipos distintos de trabajos, etc., sin la necesidad
-# de crear tantos campos que queden null.
-class AbstractKeyword(models.Model):
+class BaseKeywordRelationship(models.Model):
     class Meta:
         abstract = True
-        # indexes = [
-        #     HnswIndex(
-        #         name="embeddings_index",
-        #         fields=["embedding"],
-        #         m=16,
-        #         ef_construction=64,
-        #         opclasses=["vector_cosine_ops"],
-        #     )
-        # ]
 
-    keyword = models.CharField(max_length=100)
-    embedding = VectorField(dimensions=768, null=True, blank=True)
+    keyword = models.ForeignKey(Keyword, on_delete=models.CASCADE)
+    score = models.FloatField(null=True, blank=True)
 
 
-class TeacherKeyword(AbstractKeyword):
-    teacher = models.ManyToManyField(Teacher)
+class TeacherKeywordRelationship(BaseKeywordRelationship):
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ("teacher", "keyword")
 
 
-class TeacherScholarWorkKeyword(AbstractKeyword):
-    associated_work = models.ManyToManyField(OpenAlexScholarWork)
+class ScholarWorkKeywordRelationship(BaseKeywordRelationship):
+    scholar_work = models.ForeignKey(ScholarWork, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ("scholar_work", "keyword")
 
 
-# class FCFMCourseKeyword(AbstractKeyword):
-#     associated_course = models.ManyToManyField(FCFMCourse)
-#     course_code = models.CharField(max_length=100)
+class FCFMCourseKeywordRelationship(BaseKeywordRelationship):
+    fcfm_course = models.ForeignKey(FCFMCourse, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ("fcfm_course", "keyword")
 
 
-class GuidedThesisKeyword(AbstractKeyword):
-    associated_thesis = models.ManyToManyField(GuidedThesis)
-    ucampus_code = models.CharField(max_length=100)
+class GuidedThesisKeywordRelationship(BaseKeywordRelationship):
+    guided_thesis = models.ForeignKey(GuidedThesis, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ("guided_thesis", "keyword")

@@ -1,8 +1,7 @@
 import json
 from django.core.management.base import BaseCommand, CommandParser
-from teachers.models import Teacher, FCFMCourse, GuidedThesis
+from teachers.models import Teacher
 from teachers.teacher_data_extraction.ucampus_api import (
-    get_person_info,
     get_academics_group,
 )
 

@@ -1,15 +1,26 @@
 import os
+
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+
 import re
+import io
 import json
 import pickle
 import pandas as pd
 import tensorflow as tf
 
-# Define the path
+tf.get_logger().setLevel("ERROR")
+# tf.autograph.set_verbosity(0)
 
+###################################################
+###
+### Este script fue hecho por el equipo de OpenAlex.
+### Está en su repo https://github.com/ourresearch/openalex-concept-tagging
+###
+####################################################
+
+model = None
 model_path = "teachers/openalex_extractor/model_files/"
-
-print(os.path.join(os.getcwd() + f"/{model_path}", "model"))
 
 # Load the dictionaries
 with open(model_path + "topics_vocab.pkl", "rb") as f:
@@ -50,7 +61,7 @@ with open(model_path + "tag_id_vocab.pkl", "rb") as f:
 
 print("Loaded tag ID vocab")
 
-encoding_layer = tf.keras.layers.experimental.preprocessing.CategoryEncoding(
+encoding_layer = tf.keras.layers.experimental.preprocessing.CategoryEncoding(  # type: ignore
     num_tokens=len(target_vocab) + 1, output_mode="binary", sparse=False
 )
 
@@ -61,7 +72,7 @@ encoding_layer = tf.keras.layers.experimental.preprocessing.CategoryEncoding(
 print("Encoding layer set up")
 
 # Load the model components
-raw_model = tf.keras.models.load_model(model_path + "model", compile=False)
+raw_model = tf.keras.models.load_model(model_path + "model", compile=False)  # type: ignore
 raw_model.trainable = False
 
 # # Load the model components
@@ -70,13 +81,13 @@ raw_model.trainable = False
 
 print("Loaded raw model")
 
-mag_model = tf.keras.Model(
+mag_model = tf.keras.Model(  # type: ignore
     inputs=raw_model.inputs, outputs=tf.math.top_k(raw_model.outputs, k=250)  # type: ignore
 )
 mag_model.trainable = False
 
 for layer in mag_model.layers:
-    if isinstance(layer, tf.keras.layers.Dropout) and hasattr(layer, "rate"):
+    if isinstance(layer, tf.keras.layers.Dropout) and hasattr(layer, "rate"):  # type: ignore
         layer.rate = 0.0
 
 print("Created full model")
@@ -168,20 +179,21 @@ def convert_input_format(raw_input):
     # inverted_abstract = false
     # journal = null
     # doc_type = null
+
     output = {
         "title": raw_input,
-        "abtract": None,
+        "abstract": None,
         "inverted_abstract": False,
         "journal": None,
         "doc_type": None,
     }
 
-    return output
+    return [output]
 
 
 def transformation(dict_input):
     # Get input JSON data and convert it to a DF
-    input_json = json.dumps(dict_input)
+    input_json = io.StringIO(json.dumps(dict_input))
     input_df = pd.read_json(input_json, orient="records").reset_index()
 
     # Tokenize data
@@ -205,10 +217,10 @@ def transformation(dict_input):
     )
     input_df["abstract_tok"] = input_df["abstract_tok"].apply(cut_length, args=(256,))
 
-    paper_titles = tf.ragged.constant(input_df["paper_title_tok"].to_list()).to_tensor(
+    paper_titles = tf.ragged.constant(input_df["paper_title_tok"].to_list()).to_tensor(  # type: ignore
         shape=[None, 32]
     )
-    abstracts = tf.ragged.constant(input_df["abstract_tok"].to_list()).to_tensor(
+    abstracts = tf.ragged.constant(input_df["abstract_tok"].to_list()).to_tensor(  # type: ignore
         shape=[None, 256]
     )
 

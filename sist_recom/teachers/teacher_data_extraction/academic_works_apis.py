@@ -37,7 +37,7 @@ def get_openalex_teacher_data(teacher_id):
         response.raise_for_status()
 
     except requests.exceptions.HTTPError as e:
-        print(e.response.text)
+        print(e.response.text)  # type: ignore
 
     return response.json()
 
@@ -65,6 +65,6 @@ def get_openalex_works_of_teacher(works_api_url):
         response.raise_for_status()
 
     except requests.exceptions.HTTPError as e:
-        print(e.response.text)
+        print(e.response.text)  # type: ignore
 
     return response.json()

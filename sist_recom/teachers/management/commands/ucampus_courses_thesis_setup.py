@@ -1,6 +1,3 @@
-# Llamada a la API del repositorio para poblar la base de datos
-# con los docentes actuales.
-
 from django.core.management.base import BaseCommand, CommandParser
 from teachers.models import Teacher, FCFMCourse, GuidedThesis
 from teachers.teacher_data_extraction.ucampus_api import (
@@ -102,5 +99,6 @@ class Command(BaseCommand):
                     self.style.ERROR(
                         f"Error al momento de guardar datos provenientes de U-Campus para {teacher.name}: "
                         + format(exc)
+                        + "\n"
                     )
                 )
