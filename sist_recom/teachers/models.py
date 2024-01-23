@@ -35,7 +35,7 @@ class BaseTeacherWork(models.Model):
 
     title = models.CharField(max_length=1000)
     teacher = models.ManyToManyField(Teacher)
-    year = models.PositiveSmallIntegerField(blank=True, null=True)
+    year = models.CharField(max_length=50, blank=True, null=True)
 
     embedding_name = VectorField(dimensions=768)
 

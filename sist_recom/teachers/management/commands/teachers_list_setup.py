@@ -73,26 +73,24 @@ class Command(BaseCommand):
         # externos/as expertos/as.
         for teacher_rut in local_teacher_data:
             try:
-                # Revisamos que no exista.
-                if not Teacher.objects.filter(rut=teacher_rut):
-                    self.stdout.write(
-                        self.style.SUCCESS(
-                            f"Docente {teacher_rut}: {local_teacher_data[teacher_rut]['alias']}"
-                        )
-                    )
-
-                    # El rut es clave primaria, si creo y guardo un docente con un rut que ya existe
-                    # en la base de datos, Django solamente tratará de actualizarlo.
-                    new_teacher = Teacher(
-                        rut=teacher_rut,
-                        name=local_teacher_data[teacher_rut]["alias"],
-                        openalex_id=local_teacher_data[teacher_rut]["oa_id"],
-                        openalex_works_url=local_teacher_data[teacher_rut][
+                new_teacher = Teacher.objects.get_or_create(
+                    rut=teacher_rut,
+                    defaults={
+                        "name": local_teacher_data[teacher_rut]["alias"],
+                        "openalex_id": local_teacher_data[teacher_rut]["oa_id"],
+                        "openalex_works_url": local_teacher_data[teacher_rut][
                             "works_api_url"
                         ],
-                        dblp_id=local_teacher_data[teacher_rut]["dblp_id"],
+                        "dblp_id": local_teacher_data[teacher_rut]["dblp_id"],
+                    },
+                )
+
+                if new_teacher[1]:
+                    self.stdout.write(
+                        self.style.SUCCESS(
+                            f"Docente {new_teacher[0].rut}: {new_teacher[0].name}"
+                        )
                     )
-                    new_teacher.save()
 
             except Exception as exc:
                 self.stdout.write(

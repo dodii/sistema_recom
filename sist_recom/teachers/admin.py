@@ -162,7 +162,7 @@ class FCFMCoursedAdmin(admin.ModelAdmin):
         return sorted(
             [
                 (keyword.keyword, keyword.score)
-                for keyword in obj.fcfmcoursekeywordrelatiobship_set.all()
+                for keyword in obj.fcfmcoursekeywordrelationship_set.all()
             ],
             key=lambda x: x[1],
             reverse=True,
