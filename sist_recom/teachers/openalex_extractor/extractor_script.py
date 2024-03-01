@@ -90,7 +90,7 @@ for layer in mag_model.layers:
     if isinstance(layer, tf.keras.layers.Dropout) and hasattr(layer, "rate"):  # type: ignore
         layer.rate = 0.0
 
-print("Created full model")
+print("Created full model \n")
 
 
 def invert_abstract_to_abstract(invert_abstract):
@@ -173,7 +173,7 @@ def cut_length(data, seq_len=512):
 
 # Convierte el texto plano dado por el usuario en el input adecuado
 # para el modelo de extracción de conceptos.
-def convert_input_format(raw_input):
+def convert_input_format(title, abstract):
     # title = title
     # abstract = resumen
     # inverted_abstract = false
@@ -181,8 +181,8 @@ def convert_input_format(raw_input):
     # doc_type = null
 
     output = {
-        "title": raw_input,
-        "abstract": None,
+        "title": title,
+        "abstract": abstract,
         "inverted_abstract": False,
         "journal": None,
         "doc_type": None,

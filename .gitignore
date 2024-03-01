@@ -10,6 +10,9 @@ media
 /sist_recom/teachers/openalex_extractor/model_files
 /sist_recom/teachers/openalex_extractor/model_files.zip
 
+# BERT translate
+/sist_recom/teachers/transformers/sentence-transformers_paraphrase-multilingual-mpnet-base-v2
+
 # Backup files # 
 *.bak 
 

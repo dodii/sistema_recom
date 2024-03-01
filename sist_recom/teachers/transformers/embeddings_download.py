@@ -5,7 +5,9 @@ from pgvector.django import CosineDistance
 from teachers.models import (
     Teacher,
     Keyword,
+    TeacherKeywordRelationship,
     FCFMCourse,
+    FCFMCourseKeywordRelationship,
     GuidedThesis,
     ScholarWork,
 )
@@ -14,7 +16,7 @@ from sentence_transformers import SentenceTransformer
 paraph_multiling = "paraphrase-multilingual-mpnet-base-v2"
 
 # El modelo debería quedar en el caché para su posterior reutilización.
-model = SentenceTransformer(paraph_multiling)
+model = SentenceTransformer(paraph_multiling, cache_folder="teachers/transformers/")
 
 
 def get_embeddings_of_model(list_of_keywords):
@@ -24,50 +26,174 @@ def get_embeddings_of_model(list_of_keywords):
     return embeddings
 
 
-# En esta primera instancia, simplemente tomaré las keywords más
-# cercanas y entregaré una lista con los profes indicados.
-def teacher_similarity_calculator(string, top_n_keywords, top_n_teachers):
-    teachers = Teacher.objects.all()
-    ranking = {}
-    embedding = get_embeddings_of_model(string)
+def teacher_similarity_calculator(
+    concepts_list, concepts_scores, top_n_teachers, teachers_list
+):
+    # teachers = Teacher.objects.all()
+    # teachers = Teacher.objects.exclude(openalex_id="")
+    teachers_ranking = {}
 
-    for teacher in teachers:
-        teacher_profile_kw = teacher.keyword
+    for teacher in teachers_list:
+        teacher_keywords = teacher.keyword.all()
 
-        selected_kw = teacher_profile_kw.order_by(
-            CosineDistance("embedding", embedding)
-        )[:top_n_keywords]
+        # Casos de docentes sin keywords
+        # no pueden ser recomendados, así que
+        # serán omitidos.
+        if len(teacher_keywords) == 0:
+            continue
 
-        # Obtengo la distancia.
-        try:
-            # print(f"Keywords más parecidas: {selected_kw[0].keyword}")
+        # print(teacher)
 
-            # Embedding promedio de las top_n_keywords.
-            avg_embedding = selected_kw.aggregate(Avg("embedding"))
+        results_dict = {}
 
-            # distance = selected_kw.annotate(  # type: ignore
-            #     distance=CosineDistance("embedding", avg_embedding["embedding__avg"])
-            # )
-            distance = spatial.distance.cosine(
-                embedding, avg_embedding["embedding__avg"]
-            )
+        for i, concept in enumerate(concepts_list):
+            concept_score = concepts_scores[i]
+            input_concept_emb = get_embeddings_of_model(concept)
 
-            # ranking[teacher] = [distance[0].distance, selected_kw]  # type: ignore
-            ranking[teacher] = [distance, selected_kw]
+            distances = []
 
-        except Exception as exc:
-            print(
-                f"{teacher.name} aún no tiene keywords que lo caractericen. "
-                # + f"Excepción en particular: {exc}\n"
-            )
+            for keyword in teacher_keywords:
+                # similitud coseno = 1 - distancia coseno
+                distance = 1 - spatial.distance.cosine(
+                    input_concept_emb, keyword.embedding
+                )  # type: ignore
 
-    # Distancia Coseno va entre 0 y 2.
-    # Distancia Coseno = 1 - Simiitud Coseno
-    # Mientras más cercano a 0, mayor la similitud semántica.
-    # Entrega lista ordenada ascendentemente con los items del diccionario.
-    sorted_teacher_ranking = sorted(ranking.items(), key=lambda x: x[1][0])
+                teacher_kw_relationship = TeacherKeywordRelationship.objects.get(
+                    teacher=teacher, keyword=keyword
+                )
+                # pondered_distance = distance * teacher_kw_relationship.score  # type: ignore
+                pondered_distance = distance  # ignorar score keyword-docente por ahora
+
+                # distances.append(r)
+                distances.append((keyword.keyword, pondered_distance))
+
+            # results_list.append(result)
+
+            distances.sort(key=lambda x: x[1], reverse=True)
+
+            # Progresion geometrica: pondera en mayor cantidad la
+            # keyword con mayor semejanza, disminuyendo exponencialmente
+            # a medida que bajamos por la lista ordenada
+            pondered_distances = {
+                x: x[1] * (concept_score ** (i - 1)) for i, x in enumerate(distances)
+            }
+
+            results_dict[concept] = max(pondered_distances, key=pondered_distances.get)  # type: ignore
+
+            # Para peobar con min max, sumare todo nomas
+            # results_dict[concept] = sum(pondered_distances)  # type: ignore
+
+            # # Lista normalizacion
+            # pondered_distances = [
+            #     x[1] * (concept_score ** (i - 1))
+            #     for i, x in enumerate(distances, start=1)
+            # ]
+
+            # results_dict[concept] = sum(pondered_distances) / len(teacher_keywords)
+
+        # # normalizacion
+        # total_score = sum(results_dict.values()) / len(teacher_keywords)
+        # kw_list = [results_dict[x] for x in results_dict]
+
+        # keyword maxima
+        total_score = sum([results_dict[x][1] for x in results_dict])
+        kw_list = [results_dict[x][0] for x in results_dict]
+        teachers_ranking[teacher] = (kw_list, total_score)
+
+        # teachers_ranking[teacher] = (
+        #     max(results_dict, key=results_dict.get),  # type: ignore
+        #     max(results_dict.values()),
+        # )
+
+    # # # min max scaling
+    # lambda_f = lambda x: (
+    #     (x - min(teachers_ranking.values()))
+    #     / (max(teachers_ranking.values()) - min(teachers_ranking.values()))
+    # )
+
+    # normalized_rankings = {
+    #     k: lambda_f(teachers_ranking[k]) for k in teachers_ranking.keys()
+    # }
+
+    sorted_teacher_ranking = sorted(
+        teachers_ranking.items(), key=lambda x: x[1][1], reverse=True
+    )
 
     return dict(islice(sorted_teacher_ranking, top_n_teachers))
+
+
+def teacher_ranking_keywords_approach(concepts_list, concepts_scores, top_n_teachers):
+    concepts_calculation_dict = {}
+
+    for i, concept in enumerate(concepts_list):
+        concept_score = concepts_scores[i]
+        input_concept_emb = get_embeddings_of_model(concept)
+
+        # nearest neighbors keywords
+        # Cosine Distance = 1 - Similitud Coseno
+        # 0 = iguales, 1 = sin correlacion, 2 = opuestos
+        # ordena de más similar a opuesto
+        distances = Keyword.objects.annotate(
+            distance=1 - CosineDistance("embedding", input_concept_emb)
+        ).order_by("-distance")
+
+        pondered_distances = {}
+        for i, x in enumerate(distances):
+            result = x.distance * (concept_score ** (i - 1))  # type: ignore
+            if result > 0:  # Rescatamos relaciones relevantes nomás
+                pondered_distances[x] = x.distance * (concept_score ** (i - 1))  # type: ignore
+
+        concepts_calculation_dict[concept] = pondered_distances
+
+    related_teachers = {}
+    related_courses = {}
+
+    for concept, related_concepts in concepts_calculation_dict.items():
+        # print(concept)
+        # print(related_concepts)
+        for kw, score in related_concepts.items():
+
+            teacher_relationships = TeacherKeywordRelationship.objects.filter(
+                keyword=kw
+            )
+            if teacher_relationships:
+                # print(teacher_relationships)
+                for relationship in teacher_relationships:
+                    related_teachers[relationship.teacher] = (
+                        (
+                            related_teachers.get(relationship.teacher, 0)
+                            + score * relationship.score
+                        )
+                        if relationship.teacher.openalex_id != ""
+                        else 0
+                    )
+
+            # related_courses_relationships = (
+            #     FCFMCourseKeywordRelationship.objects.filter(keyword=kw)
+            # )
+            # if related_courses_relationships:
+            #     for relationship in related_courses_relationships:
+            #         related_courses[relationship.fcfm_course] = (
+            #             related_courses.get(relationship.fcfm_course, 0)
+            #             + score * relationship.score
+            #         )
+
+    # # Sumamos ponderación de cursos si es que tienen
+    # for teacher, scores in teacher_courses:
+    #     avg_sum = sum(scores) / len(scores)
+    #     related_teachers[teacher] = related_teachers.get(teacher, 0) + avg_sum
+
+    sorted_teacher_ranking = sorted(
+        related_teachers.items(), key=lambda x: x[1], reverse=True
+    )
+
+    top_n_result = dict(islice(sorted_teacher_ranking, top_n_teachers))
+
+    top_n_courses = [
+        # {teacher: teacher_courses[teacher][:top_n_teachers]} for teacher in top_n_result
+    ]
+
+    return [top_n_result, top_n_courses]
 
 
 def scholarworks_similarity_calculator(teacher, top_n_works, keywords):

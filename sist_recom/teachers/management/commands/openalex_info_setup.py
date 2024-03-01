@@ -32,29 +32,28 @@ class Command(BaseCommand):
         )
 
         for teacher in teachers:
-            try:
-                # Las keywords de su perfil.
-                teacher_keywords = get_openalex_teacher_data(teacher.openalex_id)
+            teacher_keywords = get_openalex_teacher_data(teacher.openalex_id)
+            # Las keywords de su perfil.
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"Respuesta de la API exitosa. Añadiendo keywords de {teacher.name}... \n"
+                )
+            )
 
-                self.stdout.write(
-                    self.style.SUCCESS(
-                        f"Respuesta de la API exitosa. Añadiendo keywords de {teacher.name}... \n"
-                    )
+            for concept in teacher_keywords["x_concepts"]:
+                # Como los conceptos vienen de OpenAlex, su
+                # display_name es único (excepto que algunos vienen
+                # con mayúsculas, así que las pasaré todas a lowercase).
+                lowercase_kw = concept["display_name"].lower()
+
+                # Si la keyword es nueva en la base de datos, se guarda.
+                # Esto devuelve tupla (objeto, flag)
+                keyword = Keyword.objects.get_or_create(
+                    keyword=lowercase_kw,
+                    defaults={"embedding": get_embeddings_of_model(lowercase_kw)},
                 )
 
-                for concept in teacher_keywords["x_concepts"]:
-                    # Como los conceptos vienen de OpenAlex, su
-                    # display_name es único (excepto que algunos vienen
-                    # con mayúsculas, así que las pasaré todas a lowercase).
-                    lowercase_kw = concept["display_name"].lower()
-
-                    # Si la keyword es nueva en la base de datos, se guarda.
-                    # Esto devuelve tupla (objeto, flag)
-                    keyword = Keyword.objects.get_or_create(
-                        keyword=lowercase_kw,
-                        embedding=get_embeddings_of_model(lowercase_kw),
-                    )
-
+                try:
                     # Se crea la nueva relación
                     teacher_kw_relationship = TeacherKeywordRelationship(
                         teacher=teacher,
@@ -62,61 +61,77 @@ class Command(BaseCommand):
                         score=concept["score"],
                     )
                     teacher_kw_relationship.save()
-
-                # Ahora se obtendrán los trabajos a partir de la url.
-                teacher_works = get_openalex_works_of_teacher(
-                    teacher.openalex_works_url
-                )
-
-                self.stdout.write(
-                    self.style.SUCCESS(
-                        f"Respuesta de la API exitosa. Guardando {teacher_works['meta']['count']} "
-                        + f"trabajos (máx. primeros 200) de {teacher.name} en la base de datos... \n"
+                except Exception as exc:
+                    self.stdout.write(
+                        self.style.ERROR(
+                            f"Error asignando keyword {keyword[0].keyword} a {teacher.name}: "
+                            + format(exc)
+                            + "\n"
+                        )
                     )
-                )
 
-                # Es una lista con los resultados.
-                for result in teacher_works["results"]:
-                    # Vemos si el trabajo ya existe en nuestra base de datos.
-                    # Esto devuelve tupla (objeto, flag)
+            # Ahora se obtendrán los trabajos a partir de la url.
+            teacher_works = get_openalex_works_of_teacher(teacher.openalex_works_url)
+
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"Respuesta de la API exitosa. Guardando {teacher_works['meta']['count']} "
+                    + f"trabajos (máx. primeros 200) de {teacher.name} en la base de datos... \n"
+                )
+            )
+
+            # Es una lista con los resultados.
+            for result in teacher_works["results"]:
+                # Vemos si el trabajo ya existe en nuestra base de datos.
+                # Esto devuelve tupla (objeto, flag creacion)
+                try:
                     scholar_work = ScholarWork.objects.get_or_create(
                         openalex_id=result["id"],
-                        title=result["title"],
-                        year=result["publication_year"],
-                        embedding_name=get_embeddings_of_model(result["title"]),
-                        abstract=inverted_index_abstract_to_plain_text(
-                            result["abstract_inverted_index"]
-                        ),
-                        doi=result["doi"],
+                        defaults={
+                            "title": result["title"],
+                            "year": result["publication_year"],
+                            "embedding_name": get_embeddings_of_model(result["title"]),
+                            "abstract": inverted_index_abstract_to_plain_text(
+                                result["abstract_inverted_index"]
+                            ),
+                            "doi": result["doi"],
+                        },
                     )
 
                     scholar_work[0].teacher.add(teacher)
 
                     # Ahora se añaden las keywords al trabajo.
                     for concept in result["concepts"]:
+                        # Si el trabajo ya existe, debe tener sus keywords listas.
+                        if scholar_work[1] == False:
+                            break
                         # Se guarda keyword si resulta ser nueva en la base de datos.
                         # Se calcula su embedding.
                         # Se pasa a lowercase por lo antes mencionado
                         lowercase_kw = concept["display_name"].lower()
                         keyword = Keyword.objects.get_or_create(
                             keyword=lowercase_kw,
-                            get_embeddings_of_model=get_embeddings_of_model(
-                                lowercase_kw
-                            ),
+                            defaults={
+                                "embedding": get_embeddings_of_model(lowercase_kw),
+                            },
                         )
+                        try:
+                            work_kw_relationship = ScholarWorkKeywordRelationship(
+                                scholar_work=scholar_work[0],
+                                keyword=keyword[0],
+                                score=concept["score"],
+                            )
+                            work_kw_relationship.save()
+                        except Exception as exc:
+                            self.stdout.write(
+                                self.style.ERROR(
+                                    f"Error al añadir'{keyword[0].keyword}' a '{scholar_work[0].title}': "
+                                    + format(exc)
+                                    + "\n"
+                                )
+                            )
 
-                        work_kw_relationship = ScholarWorkKeywordRelationship(
-                            scholar_work=scholar_work[0],
-                            keyword=keyword,
-                            score=concept["score"],
-                        )
-                        work_kw_relationship.save()
-
-            except Exception as exc:
-                self.stdout.write(
-                    self.style.ERROR(
-                        f"Error al momento de guardar datos provenientes de OpenAlex para {teacher.name}: "
-                        + format(exc)
-                        + "\n"
+                except Exception as exc:
+                    self.stdout.write(
+                        self.style.ERROR(f"Error guardando trabajo: {format(exc)} \n")
                     )
-                )

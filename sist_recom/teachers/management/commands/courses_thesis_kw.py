@@ -38,24 +38,34 @@ class Command(BaseCommand):
             # Solamente se añaden si tienen un score mayor a 0.3.
             # Esto porque en OpenAlex lo hicieron de esta forma para
             # etiquetar los trabajos de investigación.
-            # Se hará lo mismo para mantener consistencia.
+            # Se hará lo mismo para mantener la consistencia.
+            # Número mágico??!?!?!
             for index, kw in enumerate(tags):
-                if scores[index] < 0.3:
+                if scores[index] <= 0.3:
                     break
 
                 lowercase_kw = kw.lower()
                 keyword = Keyword.objects.get_or_create(
                     keyword=lowercase_kw,
-                    embedding=get_embeddings_of_model(lowercase_kw),
+                    defaults={"embedding": get_embeddings_of_model(lowercase_kw)},
                 )
 
-                # Creamos la nueva relacion keyword-curso
-                course_kw_relationship = FCFMCourseKeywordRelationship(
-                    keyword=keyword[0], fcfm_course=course, score=scores[index]
-                )
-                course_kw_relationship.save()
+                try:
+                    # Creamos la nueva relacion keyword-curso
+                    course_kw_relationship = FCFMCourseKeywordRelationship(
+                        keyword=keyword[0], fcfm_course=course, score=scores[index]
+                    )
+                    course_kw_relationship.save()
 
-                self.stdout.write(self.style.SUCCESS(lowercase_kw))
+                    self.stdout.write(self.style.SUCCESS(lowercase_kw))
+                except Exception as exc:
+                    self.stdout.write(
+                        self.style.ERROR(
+                            f"Error al añadir'{keyword[0].keyword}' a curso '{course.title}': "
+                            + format(exc)
+                            + "\n"
+                        )
+                    )
 
         self.stdout.write(
             self.style.SUCCESS("Añadiendo keywords a memorias/tesis: \n ")
@@ -84,10 +94,19 @@ class Command(BaseCommand):
                     embedding=get_embeddings_of_model(lowercase_kw),
                 )
 
-                # Creamos la nueva relacion keyword-curso
-                thesis_kw_relationship = GuidedThesisKeywordRelationship(
-                    keyword=keyword[0], guided_thesis=thesis, score=scores[index]
-                )
-                thesis_kw_relationship.save()
+                try:
+                    # Creamos la nueva relacion keyword-curso
+                    thesis_kw_relationship = GuidedThesisKeywordRelationship(
+                        keyword=keyword[0], guided_thesis=thesis, score=scores[index]
+                    )
+                    thesis_kw_relationship.save()
 
-                self.stdout.write(self.style.SUCCESS(lowercase_kw))
+                    self.stdout.write(self.style.SUCCESS(lowercase_kw))
+                except Exception as exc:
+                    self.stdout.write(
+                        self.style.ERROR(
+                            f"Error al añadir '{keyword[0].keyword}' a memoria/tesis '{thesis.title}': "
+                            + format(exc)
+                            + "\n"
+                        )
+                    )

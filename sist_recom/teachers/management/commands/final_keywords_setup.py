@@ -20,10 +20,8 @@ class Command(BaseCommand):
     "tienen datos en el sitio)."
 
     def handle(self, *args, **options):
-        teachers = Teacher.objects.filter(openalex_id="") | Teacher.objects.filter(
-            openalex_id=None
-        )
-        print(len(teachers))
+        teachers = Teacher.objects.filter(openalex_id="")
+        print(teachers)
 
         for teacher in teachers:
             associated_thesis = GuidedThesis.objects.filter(teacher=teacher)
@@ -64,25 +62,11 @@ class Command(BaseCommand):
             sorted_kw_fr = sorted(
                 keywords_frequency.items(), key=lambda x: x[1], reverse=True
             )
-            # sorted_scores_l = sorted(
-            #     scores_list.items(), key=lambda x: len(x[1]), reverse=True
-            # )
-            # sorted_agg_scores = sorted(
-            #     score_aggregator.items(), key=lambda x: x[1], reverse=True
-            # )
-
-            # print(sorted_kw_fr)
-            # print(sorted_scores_l)
-            # print(sorted_agg_scores)
 
             final_scores = {
                 keyword: score_aggregator[keyword] / keywords_frequency[keyword]
                 for keyword, _ in sorted_kw_fr
             }
-
-            # print(sorted_kw_fr)
-
-            # print(final_scores)
 
             inverse_frequency = {
                 keyword: 1 / keywords_frequency[keyword]
@@ -104,21 +88,37 @@ class Command(BaseCommand):
                 purged_dict.items(), key=lambda x: x[1], reverse=True
             )
 
-            print(sorted_purged_dict)
+            # Multiplicamos los scores por 100 para que se asemejen en dimensiones
+            # a los provenientes de OpenAlex.
+            final_dict = list(
+                map(lambda x: (x[0], round(x[1] * 100, 1)), sorted_purged_dict)
+            )
+
+            print(final_dict)
 
             # Finalmente, asociamos las keywords al perfil del docente con los
             # nuevos scores que acabamos de calcular.
-            for tuple in sorted_purged_dict:
+            for tuple in final_dict:
                 keyword = Keyword.objects.get(keyword=tuple[0])
 
                 # Solamente se crea la nueva relación, porque las keywords ya existen
                 # al haber sido extraídas de sus cursos/tesis para calcular todo esto.
-                teacher_kw_relationship = TeacherKeywordRelationship(
-                    teacher=teacher,
-                    keyword=keyword,
-                    score=tuple[1],
-                )
-                teacher_kw_relationship.save()
+                try:
+                    teacher_kw_relationship = TeacherKeywordRelationship(
+                        teacher=teacher,
+                        keyword=keyword,
+                        score=tuple[1],
+                    )
+                    teacher_kw_relationship.save()
+
+                except Exception as exc:
+                    self.stdout.write(
+                        self.style.ERROR(
+                            f"Error al añadir '{keyword.keyword}' a docente '{teacher.name}': "
+                            + format(exc)
+                            + "\n"
+                        )
+                    )
 
             self.stdout.write(
                 self.style.SUCCESS(

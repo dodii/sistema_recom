@@ -26,12 +26,13 @@ class TeacherAdmin(admin.ModelAdmin):
     search_help_text = "Buscar por nombre"
     list_display = [
         "name",
+        "rut",
         "openalex_id",
         "dblp_id",
         "get_keywords",
         "get_courses",
         "get_memories",
-        # "get_works",
+        "get_works",
     ]
 
     @admin.display(description="keywords")
@@ -76,7 +77,7 @@ class ScholarWorkAdmin(admin.ModelAdmin):
     def get_keywords(self, obj):
         return sorted(
             [
-                (keyword.keyword, keyword.score)
+                (keyword.keyword.keyword, keyword.score)
                 for keyword in obj.scholarworkkeywordrelationship_set.all()
             ],
             key=lambda x: x[1],
@@ -85,27 +86,15 @@ class ScholarWorkAdmin(admin.ModelAdmin):
 
 
 class ScholarWorkKeywordRelationshipAdmin(admin.ModelAdmin):
-    # search_fields = ["keyword", "associated_work__title"]
-    # search_help_text = "Buscar por keyword o título de trabajo"
-    # list_display = ["keyword", "get_works"]
-    # filter_horizontal = ("associated_work",)
-
-    # @admin.display(description="works")
-    # def get_works(self, obj):
-    #     return [work.title for work in obj.associated_work.all()
-    pass
+    search_fields = ["keyword__keyword", "scholar_work__title"]
+    search_help_text = "Buscar por keyword o nombre de trabajo"
+    list_display = ["keyword", "score", "scholar_work"]
 
 
 class TeacherKeywordRelationshipAdmin(admin.ModelAdmin):
-    # search_fields = ["keyword", "teacher__name"]
-    # search_help_text = "Buscar por keyword o docente"
-    # list_display = ["keyword", "get_teachers"]
-    # filter_horizontal = ("teacher",)
-
-    # @admin.display(description="teachers")
-    # def get_teachers(self, obj):
-    #     return [teacher.name for teacher in obj.teacher.all()]
-    pass
+    search_fields = ["keyword__keyword", "teacher__name"]
+    search_help_text = "Buscar por keyword o docente"
+    list_display = ["keyword", "teacher", "score"]
 
 
 class GuidedThesisAdmin(admin.ModelAdmin):
@@ -123,7 +112,7 @@ class GuidedThesisAdmin(admin.ModelAdmin):
     def get_keywords(self, obj):
         return sorted(
             [
-                (keyword.keyword, keyword.score)
+                (keyword.keyword.keyword, keyword.score)
                 for keyword in obj.guidedthesiskeywordrelationship_set.all()
             ],
             key=lambda x: x[1],
@@ -132,18 +121,9 @@ class GuidedThesisAdmin(admin.ModelAdmin):
 
 
 class GuidedThesisKeywordRelationshipdAdmin(admin.ModelAdmin):
-    # search_fields = ["keyword", "associated_thesis__title"]
-    # search_help_text = "Buscar por keyword o memoria/tesis"
-    # list_display = ["keyword", "get_guidedthesis"]
-    # filter_horizontal = ("associated_thesis",)
-
-    # @admin.display(description="thesis")
-    # def get_guidedthesis(self, obj):
-    #     return [
-    #         f"{thesis.ucampus_id}: {thesis.title}"
-    #         for thesis in obj.associated_thesis.all()
-    #     ]
-    pass
+    search_fields = ["keyword__keyword", "guided_thesis__title"]
+    search_help_text = "Buscar por keyword o memoria/tesis"
+    list_display = ["keyword", "score", "guided_thesis"]
 
 
 class FCFMCoursedAdmin(admin.ModelAdmin):
@@ -161,7 +141,7 @@ class FCFMCoursedAdmin(admin.ModelAdmin):
     def get_keywords(self, obj):
         return sorted(
             [
-                (keyword.keyword, keyword.score)
+                (keyword.keyword.keyword, keyword.score)
                 for keyword in obj.fcfmcoursekeywordrelationship_set.all()
             ],
             key=lambda x: x[1],
@@ -170,18 +150,9 @@ class FCFMCoursedAdmin(admin.ModelAdmin):
 
 
 class FCFMCourseKeywordRelationshipAdmin(admin.ModelAdmin):
-    # search_fields = ["keyword", "associated_course__title"]
-    # search_help_text = "Buscar por keyword o curso"
-    # list_display = ["keyword", "get_courses"]
-    # filter_horizontal = ("associated_course",)
-
-    # @admin.display(description="course")
-    # def get_courses(self, obj):
-    #     return [
-    #         f"{course.course_code}: {course.title}"
-    #         for course in obj.associated_course.all()
-    #     ]
-    pass
+    search_fields = ["keyword__keyword", "fcfm_course__title"]
+    search_help_text = "Buscar por keyword o curso"
+    list_display = ["keyword", "score", "fcfm_course"]
 
 
 # Register your models here.
