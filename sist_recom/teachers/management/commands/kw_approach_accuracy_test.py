@@ -31,7 +31,7 @@ class Command(BaseCommand):
         for teacher in all_teachers:
             teachers_count[teacher] = 0
 
-        top_n = 5
+        top_n = 7
 
         fall_2022 = pd.read_excel("informes_e/datos_otono_2022_keywords_gpt.xlsx")
         spring_2022 = pd.read_excel("informes_e/datos_primavera_2022_keywords_gpt.xlsx")
@@ -58,13 +58,14 @@ class Command(BaseCommand):
 
             work_title = fall_2022["Tema"][i]
             print(work_title)
-            work_content = fall_2022["Texto Propuesta"][i]
+            # work_content = fall_2022["Texto Propuesta"][i]
 
             translated_title = translate_es_en(work_title)
-            translated_content = translate_es_en(work_content)
+            # translated_content = translate_es_en(work_content)
 
             # Se pasa al extractor y se obtienen las keywords asociadas.
-            formatted_input = convert_input_format(translated_title, translated_content)
+            # formatted_input = convert_input_format(translated_title, translated_content)
+            formatted_input = convert_input_format(translated_title, None)
             extractor_output = json.loads(transformation(formatted_input))
 
             tagged_concepts = extractor_output[0]["tags"]
@@ -109,13 +110,14 @@ class Command(BaseCommand):
 
             work_title = spring_2022["Tema"][i]
             print(work_title)
-            work_content = spring_2022["Texto Propuesta"][i]
+            # work_content = spring_2022["Texto Propuesta"][i]
 
             translated_title = translate_es_en(work_title)
-            translated_content = translate_es_en(work_content)
+            # translated_content = translate_es_en(work_content)
 
             # Se pasa al extractor y se obtienen las keywords asociadas.
-            formatted_input = convert_input_format(translated_title, translated_content)
+            # formatted_input = convert_input_format(translated_title, translated_content)
+            formatted_input = convert_input_format(translated_title, None)
             extractor_output = json.loads(transformation(formatted_input))
 
             tagged_concepts = extractor_output[0]["tags"]

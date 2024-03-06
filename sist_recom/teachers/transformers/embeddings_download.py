@@ -1,4 +1,7 @@
 from scipy import spatial
+from statistics import mean
+import numpy as np
+from collections import defaultdict
 from itertools import islice
 from django.db.models import Avg
 from pgvector.django import CosineDistance
@@ -141,31 +144,29 @@ def teacher_ranking_keywords_approach(concepts_list, concepts_scores, top_n_teac
         for i, x in enumerate(distances):
             result = x.distance * (concept_score ** (i - 1))  # type: ignore
             if result > 0:  # Rescatamos relaciones relevantes nomás
-                pondered_distances[x] = x.distance * (concept_score ** (i - 1))  # type: ignore
+                # Las palabras que más se parecen tendrán más valor. A medida que disminuye el parecido,
+                # la ponderación disminuye siguiendo esta progresión geométrica.
+                # De esta forma, las keywords menos relevantes valen mucho menos.
+                pondered_distances[x] = (x.distance) * concept_score ** (i - 1)  # type: ignore
 
         concepts_calculation_dict[concept] = pondered_distances
 
     related_teachers = {}
-    related_courses = {}
+    related_courses = defaultdict(list)
 
     for concept, related_concepts in concepts_calculation_dict.items():
-        # print(concept)
-        # print(related_concepts)
         for kw, score in related_concepts.items():
-
             teacher_relationships = TeacherKeywordRelationship.objects.filter(
                 keyword=kw
             )
             if teacher_relationships:
-                # print(teacher_relationships)
                 for relationship in teacher_relationships:
                     related_teachers[relationship.teacher] = (
-                        (
-                            related_teachers.get(relationship.teacher, 0)
-                            + score * relationship.score
-                        )
-                        if relationship.teacher.openalex_id != ""
-                        else 0
+                        related_teachers.get(relationship.teacher, 0)
+                        + score * relationship.score
+                        # if relationship.teacher.openalex_id
+                        # != ""  # Para testear sin docentes con keywords generadas por las memorias, para evitar cruce de datos.
+                        # else 0
                     )
 
             # related_courses_relationships = (
@@ -173,24 +174,38 @@ def teacher_ranking_keywords_approach(concepts_list, concepts_scores, top_n_teac
             # )
             # if related_courses_relationships:
             #     for relationship in related_courses_relationships:
-            #         related_courses[relationship.fcfm_course] = (
-            #             related_courses.get(relationship.fcfm_course, 0)
-            #             + score * relationship.score
-            #         )
+            #         course = relationship.fcfm_course
+            #         teachers = course.teacher.all()
+            #         for teacher in teachers:
+            #             related_courses[teacher].append((course, relationship.score))
+            #         # related_courses[relationship.fcfm_course] = (
+            #         #     related_courses.get(relationship.fcfm_course, 0)
+            #         #     + score * relationship.score
+            #         # )
 
-    # # Sumamos ponderación de cursos si es que tienen
-    # for teacher, scores in teacher_courses:
-    #     avg_sum = sum(scores) / len(scores)
+    # Sumamos ponderación de cursos si es que tienen
+    # for teacher, courses_scores_list in related_courses.items():
+    #     avg_sum = mean([duple[1] for duple in courses_scores_list])
     #     related_teachers[teacher] = related_teachers.get(teacher, 0) + avg_sum
 
+    # # min max scaling
+    lambda_f = lambda x: (
+        (x - min(related_teachers.values()))
+        / (max(related_teachers.values()) - min(related_teachers.values()))
+    )
+
+    normalized_rankings = {
+        k: lambda_f(related_teachers[k]) for k in related_teachers.keys()
+    }
+
     sorted_teacher_ranking = sorted(
-        related_teachers.items(), key=lambda x: x[1], reverse=True
+        normalized_rankings.items(), key=lambda x: x[1], reverse=True
     )
 
     top_n_result = dict(islice(sorted_teacher_ranking, top_n_teachers))
 
     top_n_courses = [
-        # {teacher: teacher_courses[teacher][:top_n_teachers]} for teacher in top_n_result
+        # {teacher: related_courses[teacher][:top_n_teachers]} for teacher in top_n_result
     ]
 
     return [top_n_result, top_n_courses]

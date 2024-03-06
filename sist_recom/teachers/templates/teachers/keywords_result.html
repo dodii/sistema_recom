@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultado Keywords</title>
+    <style>
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            /* Adjust the number of columns as needed */
+            grid-gap: 20px;
+            /* Adjust the gap between grid items */
+        }
+
+        .grid-item {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+    </style>
+    <script>
+        function addItem() {
+            // Create a new list item
+            var newItem = document.createElement("li");
+            // Set the text content of the new item
+            newItem.textContent = "Nueva keyword";
+            // Append the new item to the unordered list
+            document.getElementById("keywords-scores-list").appendChild(newItem);
+        }
+    </script>
+</head>
+
+<body>
+    <h1>Resultado Keywords</h1>
+    <p id="title" name="title">Título: {{title}}</p>
+    <ul id="keywords-scores-list" style="list-style-type: none;">
+        {% for keyword, score in keywords_scores %}
+        <li>{{ keyword }} - {{ score }}</li>
+        {% endfor %}
+    </ul>
+    <!-- Button to add a new list item -->
+    <button onclick="addItem()">Añadir keyword</button> <br><br>
+    <!-- <p id=" keywords" name="keywords">{{ keywords_result }}</p>
+        <p id="scores" name="scores">{{ scores }}</p> -->
+    <form action="{% url 'ranking_result' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="title" value="{{ title }}">
+        <input type="hidden" name="keywords" value="{{ keywords_result|join:',' }}">
+        <input type="hidden" name="scores" value="{{ scores|join:',' }}">
+
+        <input type="submit" value="Generar ranking docentes">
+    </form>
+</body>
+
+</html>
