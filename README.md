@@ -1,4 +1,4 @@
-Sistema de recomendación para evaluar memorias en el DCC
+*Sistema de recomendación para evaluar memorias en el DCC*
 
 Está construido sobre Django y PostgreSQL, junto a la extensión [pgvector](https://github.com/pgvector/pgvector-python).
 
