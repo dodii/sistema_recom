@@ -13,9 +13,6 @@ media
 # BERT translate
 /sist_recom/teachers/transformers/sentence-transformers_paraphrase-multilingual-mpnet-base-v2
 
-# excels con info de memorias
-/sist_recom/informes_e
-
 # Backup files # 
 *.bak 
 
