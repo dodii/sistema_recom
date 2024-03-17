@@ -11,7 +11,9 @@ from teachers.teacher_data_extraction.academic_works_apis import (
     get_openalex_teacher_data,
 )
 from teachers.teacher_data_extraction.utils import inverted_index_abstract_to_plain_text
-from teachers.transformers.embeddings_download import get_embeddings_of_model
+from sist_recom.teachers.transformers.embeddings_and_filtering import (
+    get_embeddings_of_model,
+)
 
 
 class Command(BaseCommand):

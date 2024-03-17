@@ -10,7 +10,6 @@ import pandas as pd
 import tensorflow as tf
 
 tf.get_logger().setLevel("ERROR")
-# tf.autograph.set_verbosity(0)
 
 ###################################################
 ###
@@ -65,19 +64,11 @@ encoding_layer = tf.keras.layers.experimental.preprocessing.CategoryEncoding(  #
     num_tokens=len(target_vocab) + 1, output_mode="binary", sparse=False
 )
 
-# encoding_layer = tf.keras.layers.CategoryEncoding(
-#     num_tokens=len(target_vocab) + 1, output_mode="binary"
-# )
-
 print("Encoding layer set up")
 
 # Load the model components
 raw_model = tf.keras.models.load_model(model_path + "model", compile=False)  # type: ignore
 raw_model.trainable = False
-
-# # Load the model components
-# raw_model = tf.saved_model.load(model_path + "model")
-# raw_model.trainable = False
 
 print("Loaded raw model")
 
@@ -171,14 +162,13 @@ def cut_length(data, seq_len=512):
     return data[:seq_len]
 
 
-# Convierte el texto plano dado por el usuario en el input adecuado
-# para el modelo de extracción de conceptos.
-def convert_input_format(title, abstract):
-    # title = title
-    # abstract = resumen
-    # inverted_abstract = false
-    # journal = null
-    # doc_type = null
+"""
+Convierte el texto plano dado por el usuario en el input adecuado
+para el modelo de extracción de conceptos.
+"""
+
+
+def convert_input_format(title, abstract=None):
 
     output = {
         "title": title,
@@ -201,7 +191,6 @@ def transformation(dict_input):
     input_df["abstract"] = input_df.apply(
         lambda x: clean_abstract(x.abstract, x.inverted_abstract), axis=1
     )
-    # input_df["abstract"] = input_df["abstract"]
     input_df["journal"] = input_df["journal"].apply(try_lowercase)
     input_df["paper_title_tok"] = input_df["title"].apply(tokenize_title)
     input_df["abstract_tok"] = input_df["abstract"].apply(tokenize_title)

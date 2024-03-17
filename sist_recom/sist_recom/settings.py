@@ -37,6 +37,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# CSRF_TRUSTED_ORIGINS = ["https://*.ngrok-free.app"]
+
 
 # Application definition
 
@@ -47,9 +49,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # "teachers.apps.TeachersConfig",
     "teachers",
     "polymorphic",
+    "django_extensions",
 ]
 
 MIDDLEWARE = [

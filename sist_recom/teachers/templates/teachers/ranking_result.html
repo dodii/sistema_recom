@@ -18,15 +18,16 @@
         .teacher {
             display: inline-block;
             width: 100px;
+            white-space: nowrap;
         }
 
         .score {
             float: inline-block;
             width: auto;
+            margin-left: 100px
         }
     </style>
     <script>
-        // Find the longest key and adjust the width of .key accordingly
         var longestKey = 0;
         var keys = document.querySelectorAll('.teacher');
         keys.forEach(function (key) {
@@ -41,14 +42,25 @@
 <body>
     <h1>Recomendación de docentes</h1>
     <p id="title" name="title">Título: {{title}}</p>
-    <ul id="teachers-ranking" style="list-style-type: none;">
+    <strong>Docentes</strong>
+    <ul id="teachers_ranking" style="list-style-type: none;">
         {% for teacher, score in teachers %}
-        <!-- <li>{{ teacher }} - {{ score }}</li>
-         -->
         <li><span class="teacher">{{ teacher }}:</span> <span class="score">{{ score }}</span></li>
         {% endfor %}
     </ul>
-    <!-- <p id="teachers" name="teachers">Docentes (orden descendente): {{ teachers }}</p> -->
+    <strong>Trabajos relacionados</strong>
+    <ul id="related_works" style="list-style-type: none;">
+        {% for teacher, works_list in works %}
+        <li><span class="teacher" style="font-weight: bold;">{{ teacher }}:</span></li>
+        {% for work in works_list %}
+        <li><span class="work">{{ work }}</span></li>
+        {% endfor %}
+        {% endfor %}
+    </ul>
+    <button onclick="history.back()">
+        Volver a las keywords
+    </button> <br><br>
+    <a href="/">Volver al inicio</a>
 </body>
 
 </html>

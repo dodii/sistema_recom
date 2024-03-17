@@ -1,6 +1,8 @@
 from django.core.management.base import BaseCommand
 from teachers.models import GuidedThesis
-from teachers.transformers.embeddings_download import get_embeddings_of_model
+from sist_recom.teachers.transformers.embeddings_and_filtering import (
+    get_embeddings_of_model,
+)
 
 
 class Command(BaseCommand):

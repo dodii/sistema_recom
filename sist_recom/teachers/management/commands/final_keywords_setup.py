@@ -9,7 +9,7 @@ from teachers.models import (
     GuidedThesisKeywordRelationship,
     FCFMCourseKeywordRelationship,
 )
-from teachers.transformers.embeddings_download import (
+from sist_recom.teachers.transformers.embeddings_and_filtering import (
     get_embeddings_of_model,
 )
 
@@ -36,7 +36,6 @@ class Command(BaseCommand):
             )
 
             keywords_frequency = defaultdict(int)
-            scores_list = defaultdict(list)
             score_aggregator = defaultdict(float)
 
             for thesis in associated_thesis:
@@ -46,7 +45,6 @@ class Command(BaseCommand):
 
                 for kw in keywords:
                     keywords_frequency[kw.keyword] += 1
-                    scores_list[kw.keyword].append(kw.score)  # type: ignore
                     score_aggregator[kw.keyword] += kw.score  # type: ignore
 
             for course in associated_courses:
@@ -56,7 +54,6 @@ class Command(BaseCommand):
 
                 for kw in keywords:
                     keywords_frequency[kw.keyword] += 1
-                    scores_list[kw.keyword].append(kw.score)  # type: ignore
                     score_aggregator[kw.keyword] += kw.score  # type: ignore
 
             sorted_kw_fr = sorted(

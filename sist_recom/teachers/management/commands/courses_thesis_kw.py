@@ -7,8 +7,10 @@ from teachers.models import (
     FCFMCourseKeywordRelationship,
     GuidedThesisKeywordRelationship,
 )
-from teachers.transformers.translation_download import translate_es_en
-from teachers.transformers.embeddings_download import get_embeddings_of_model
+from sist_recom.teachers.transformers.translation_model import translate_es_en
+from sist_recom.teachers.transformers.embeddings_and_filtering import (
+    get_embeddings_of_model,
+)
 from teachers.openalex_extractor.extractor_script import (
     convert_input_format,
     transformation,

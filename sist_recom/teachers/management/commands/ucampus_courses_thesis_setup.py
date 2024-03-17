@@ -3,7 +3,9 @@ from teachers.models import Teacher, FCFMCourse, GuidedThesis
 from teachers.teacher_data_extraction.ucampus_api import (
     get_person_info,
 )
-from teachers.transformers.embeddings_download import get_embeddings_of_model
+from sist_recom.teachers.transformers.embeddings_and_filtering import (
+    get_embeddings_of_model,
+)
 
 
 class Command(BaseCommand):

@@ -4,9 +4,9 @@ import time
 import datetime
 from django.core.management.base import BaseCommand
 from teachers.models import Teacher
-from teachers.transformers.translation_download import translate_es_en
+from sist_recom.teachers.transformers.translation_model import translate_es_en
 
-from teachers.transformers.embeddings_download import (
+from sist_recom.teachers.transformers.embeddings_and_filtering import (
     teacher_ranking_keywords_approach,
 )
 

@@ -1,9 +1,7 @@
-from ast import literal_eval
-
 """
 OpenAlex incluye los abstracts de los trabajos, pero están guardados
-como índices invertidos, por un tema legal. Para poder convertirlos a texto
-común y corriente, se puede utilizar esta funnción.
+como índices invertidos por un asunto legal. Para poder convertirlos a texto
+en prosa, se puede utilizar esta funnción.
 """
 
 

@@ -1,16 +1,12 @@
 from scipy import spatial
-from statistics import mean
 import numpy as np
-from collections import defaultdict
 from itertools import islice
 from django.db.models import Avg
 from pgvector.django import CosineDistance
 from teachers.models import (
-    Teacher,
     Keyword,
     TeacherKeywordRelationship,
     FCFMCourse,
-    FCFMCourseKeywordRelationship,
     GuidedThesis,
     ScholarWork,
 )
@@ -18,22 +14,19 @@ from sentence_transformers import SentenceTransformer
 
 paraph_multiling = "paraphrase-multilingual-mpnet-base-v2"
 
-# El modelo debería quedar en el caché para su posterior reutilización.
+# El modelo debería quedar en el caché para reutilizarlo.
 model = SentenceTransformer(paraph_multiling, cache_folder="teachers/transformers/")
 
 
 def get_embeddings_of_model(list_of_keywords):
     embeddings = model.encode(list_of_keywords)
-
-    # Por ahora es solo esto.
     return embeddings
 
 
+# obsoleto
 def teacher_similarity_calculator(
     concepts_list, concepts_scores, top_n_teachers, teachers_list
 ):
-    # teachers = Teacher.objects.all()
-    # teachers = Teacher.objects.exclude(openalex_id="")
     teachers_ranking = {}
 
     for teacher in teachers_list:
@@ -44,8 +37,6 @@ def teacher_similarity_calculator(
         # serán omitidos.
         if len(teacher_keywords) == 0:
             continue
-
-        # print(teacher)
 
         results_dict = {}
 
@@ -64,13 +55,10 @@ def teacher_similarity_calculator(
                 teacher_kw_relationship = TeacherKeywordRelationship.objects.get(
                     teacher=teacher, keyword=keyword
                 )
-                # pondered_distance = distance * teacher_kw_relationship.score  # type: ignore
-                pondered_distance = distance  # ignorar score keyword-docente por ahora
+                pondered_distance = distance * teacher_kw_relationship.score  # type: ignore
+                # pondered_distance = distance  # ignorar score keyword-docente por ahora
 
-                # distances.append(r)
                 distances.append((keyword.keyword, pondered_distance))
-
-            # results_list.append(result)
 
             distances.sort(key=lambda x: x[1], reverse=True)
 
@@ -83,7 +71,7 @@ def teacher_similarity_calculator(
 
             results_dict[concept] = max(pondered_distances, key=pondered_distances.get)  # type: ignore
 
-            # Para peobar con min max, sumare todo nomas
+            # Para probar con min max, sumare todo nomas
             # results_dict[concept] = sum(pondered_distances)  # type: ignore
 
             # # Lista normalizacion
@@ -125,14 +113,14 @@ def teacher_similarity_calculator(
     return dict(islice(sorted_teacher_ranking, top_n_teachers))
 
 
-def teacher_ranking_keywords_approach(concepts_list, concepts_scores, top_n_teachers):
+def teacher_ranking_keywords_approach(concepts_list, concepts_scores, top_n_teachers=7):
     concepts_calculation_dict = {}
 
     for i, concept in enumerate(concepts_list):
         concept_score = concepts_scores[i]
         input_concept_emb = get_embeddings_of_model(concept)
 
-        # nearest neighbors keywords
+        # Nearest neighbors keywords
         # Cosine Distance = 1 - Similitud Coseno
         # 0 = iguales, 1 = sin correlacion, 2 = opuestos
         # ordena de más similar a opuesto
@@ -152,7 +140,6 @@ def teacher_ranking_keywords_approach(concepts_list, concepts_scores, top_n_teac
         concepts_calculation_dict[concept] = pondered_distances
 
     related_teachers = {}
-    related_courses = defaultdict(list)
 
     for concept, related_concepts in concepts_calculation_dict.items():
         for kw, score in related_concepts.items():
@@ -165,30 +152,11 @@ def teacher_ranking_keywords_approach(concepts_list, concepts_scores, top_n_teac
                         related_teachers.get(relationship.teacher, 0)
                         + score * relationship.score
                         # if relationship.teacher.openalex_id
-                        # != ""  # Para testear sin docentes con keywords generadas por las memorias, para evitar cruce de datos.
+                        # != ""  # Para testear sin docentes con keywords generadas por las memorias, evitando cruce de datos.
                         # else 0
                     )
 
-            # related_courses_relationships = (
-            #     FCFMCourseKeywordRelationship.objects.filter(keyword=kw)
-            # )
-            # if related_courses_relationships:
-            #     for relationship in related_courses_relationships:
-            #         course = relationship.fcfm_course
-            #         teachers = course.teacher.all()
-            #         for teacher in teachers:
-            #             related_courses[teacher].append((course, relationship.score))
-            #         # related_courses[relationship.fcfm_course] = (
-            #         #     related_courses.get(relationship.fcfm_course, 0)
-            #         #     + score * relationship.score
-            #         # )
-
-    # Sumamos ponderación de cursos si es que tienen
-    # for teacher, courses_scores_list in related_courses.items():
-    #     avg_sum = mean([duple[1] for duple in courses_scores_list])
-    #     related_teachers[teacher] = related_teachers.get(teacher, 0) + avg_sum
-
-    # # min max scaling
+    # min max scaling
     lambda_f = lambda x: (
         (x - min(related_teachers.values()))
         / (max(related_teachers.values()) - min(related_teachers.values()))
@@ -202,62 +170,67 @@ def teacher_ranking_keywords_approach(concepts_list, concepts_scores, top_n_teac
         normalized_rankings.items(), key=lambda x: x[1], reverse=True
     )
 
-    top_n_result = dict(islice(sorted_teacher_ranking, top_n_teachers))
+    ranking = dict(islice(sorted_teacher_ranking, top_n_teachers))
 
-    top_n_courses = [
-        # {teacher: related_courses[teacher][:top_n_teachers]} for teacher in top_n_result
-    ]
+    # Consultar publicaciones, memorias guiadas y cursos.
+    top_n_works = get_most_related_works(ranking, concepts_list)
 
-    return [top_n_result, top_n_courses]
+    return [ranking, top_n_works]
 
 
-def scholarworks_similarity_calculator(teacher, top_n_works, keywords):
-    publications = ScholarWork.objects.filter(teacher=teacher)
-    avg_embedding = keywords.aggregate(Avg("embedding"))["embedding__avg"]
+def get_most_related_works(teachers_ranking, input_concepts, top_n_works=5):
 
-    # Obtengo la distancia.
-    try:
-        # Por ahora solo con el embedding del nombre del curso.
-        selected_works = publications.order_by(
-            CosineDistance("embedding_name", avg_embedding)
-        )[:top_n_works]
+    # avg embedding
+    avg_input_embedding = np.add.reduce(
+        [get_embeddings_of_model(concept) for concept in input_concepts]
+    ) / len(input_concepts)
 
-        return selected_works
-    except Exception:
-        print(
-            f"{teacher.name} aún no tiene publicaciones guardadas, se omite su cálculo. \n"
+    teacher_works = {}
+
+    for teacher in teachers_ranking:
+        works = {}
+        works.update(
+            {
+                course: (
+                    course.keyword.all().aggregate(Avg("embedding"))["embedding__avg"]
+                    if course.keyword.all()
+                    else course.embedding_name
+                )
+                for course in FCFMCourse.objects.filter(teacher=teacher)
+            }
+        )
+        works.update(
+            {
+                publication: (
+                    publication.keyword.all().aggregate(Avg("embedding"))[
+                        "embedding__avg"
+                    ]
+                    if publication.keyword.all()
+                    else publication.embedding_name
+                )
+                for publication in ScholarWork.objects.filter(teacher=teacher)
+            }
+        )
+        works.update(
+            {
+                thesis: (
+                    thesis.keyword.all().aggregate(Avg("embedding"))["embedding__avg"]
+                    if thesis.keyword.all()
+                    else thesis.embedding_name
+                )
+                for thesis in GuidedThesis.objects.filter(teacher=teacher)
+            }
         )
 
+        for work, avg_embedding in works.items():
+            try:
+                works[work] = 1 - spatial.distance.cosine(
+                    avg_embedding, avg_input_embedding
+                )  # type: ignore
+            except Exception as exc:
+                print(exc)
 
-def guidedthesis_similarity_calculator(teacher, top_n_thesis, keywords):  # string):
-    courses = GuidedThesis.objects.filter(teacher=teacher)
-    avg_embedding = keywords.aggregate(Avg("embedding"))["embedding__avg"]
+        sorted_works = sorted(works.items(), key=lambda x: x[1], reverse=True)
+        teacher_works[teacher] = dict(islice(sorted_works, top_n_works))
 
-    # Obtengo la distancia.
-    try:
-        # Por ahora solo con el embedding del nombre del curso.
-        selected_thesis = courses.order_by(
-            CosineDistance("embedding_name", avg_embedding)
-        )[:top_n_thesis]
-
-        return selected_thesis
-    except Exception:
-        print(
-            f"{teacher.name} aún no tiene tesis/memorias guiadas, se omite su cálculo. \n"
-        )
-
-
-def fcfmcourses_similarity_calculator(teacher, top_n_cursos, keywords):  # string):
-    courses = FCFMCourse.objects.filter(teacher=teacher)
-    avg_embedding = keywords.aggregate(Avg("embedding"))["embedding__avg"]
-
-    # Obtengo la distancia.
-    try:
-        # Por ahora solo con el embedding del nombre del curso.
-        selected_courses = courses.order_by(
-            CosineDistance("embedding_name", avg_embedding)
-        )[:top_n_cursos]
-
-        return selected_courses
-    except Exception:
-        print(f"{teacher.name} aún no tiene cursos, se omite su cálculo. \n")
+    return teacher_works

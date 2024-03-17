@@ -6,52 +6,194 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resultado Keywords</title>
     <style>
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            /* Adjust the number of columns as needed */
-            grid-gap: 20px;
-            /* Adjust the gap between grid items */
+        ul {
+            list-style: none;
+            padding: 0;
         }
 
-        .grid-item {
-            border: 1px solid #ccc;
-            padding: 10px;
-            text-align: center;
+        li {
+            padding: 5px;
+        }
+
+        .keyword {
+            display: inline-block;
+            width: 100px;
+            word-wrap: break-word;
+        }
+
+        .score {
+            display: inline-block;
+            width: auto;
+        }
+
+        .remove-btn {
+            margin-left: 10px;
+            background-color: #dc143c;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        #add-btn {
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+
+        .warning {
+            color: red;
+            font-size: 12px;
+            margin-left: 5px;
         }
     </style>
     <script>
-        function addItem() {
-            // Create a new list item
-            var newItem = document.createElement("li");
-            // Set the text content of the new item
-            newItem.textContent = "Nueva keyword";
-            // Append the new item to the unordered list
-            document.getElementById("keywords-scores-list").appendChild(newItem);
+        function align() {
+            var longestKey = 0;
+            var keys = document.querySelectorAll('.kw');
+            keys.forEach(function (key) {
+                longestKey = Math.max(longestKey, key.offsetWidth);
+            });
+            keys.forEach(function (key) {
+                key.style.width = longestKey + 'px';
+            });
+        }
+        window.onload = align();
+    </script>
+    <script>
+        function removeItem(button) {
+            // Get the parent <li> element of the button
+            var listItem = button.parentNode;
+            // Remove the <li> element from the unordered list
+            listItem.parentNode.removeChild(listItem);
+        }
+
+        function addItem(event) {
+            event.preventDefault(); // Prevent form submission
+            // Get the key and value from input fields
+            var keyword = document.getElementById('keyword-input').value;
+            var score = document.getElementById('score-input').value;
+
+            // Validate the keyword and score
+            if (keyword.trim() === '') {
+                document.getElementById('keyword-score-warning').textContent = "Keyword no puede ser vacía";
+                return; // Exit the function if the score is invalid
+            }
+
+            // Clear any previous warning message
+            document.getElementById('keyword-score-warning').textContent = '';
+
+            var score = parseFloat(score);
+            if (isNaN(score) || score < 0 || score > 1) {
+                document.getElementById('keyword-score-warning').textContent = "El score debe estar entre 0 y 1.";
+                return; // Exit the function if the score is invalid
+            }
+
+            // Clear any previous warning message
+            document.getElementById('keyword-score-warning').textContent = '';
+
+            // Create a new list item with the key and value
+            var newItem = document.createElement('li');
+            newItem.innerHTML = `<span class="keyword">${keyword}:</span> <span class="score">${score}</span> <button class="remove-btn" onclick="removeItem(this)">Quitar</button>`;
+            // Append the new list item to the unordered list
+            document.getElementById('keywords-scores-list').appendChild(newItem);
+            // Clear the input fields
+            document.getElementById('keyword-input').value = '';
+            document.getElementById('score-input').value = '';
+            align();
+        }
+
+        // Function to get CSRF token from cookie
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function sendUpdatedList() {
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/ranking_result/';
+
+            var csrfTokenInput = document.createElement('input');
+            csrfTokenInput.type = 'hidden';
+            csrfTokenInput.name = 'csrfmiddlewaretoken';
+            csrfTokenInput.value = getCookie('csrftoken');
+            form.appendChild(csrfTokenInput);
+
+            var keywords = [];
+            var scores = [];
+
+            var listItems = document.querySelectorAll('#keywords-scores-list li');
+            listItems.forEach(function (item, index) {
+                var keyword = item.querySelector('.keyword').textContent;
+                var score = item.querySelector('.score').textContent;
+
+                keywords.push(keyword);
+                scores.push(score);
+            });
+
+            if (keywords.length === 0) {
+                document.getElementById('keyword-score-warning').textContent = "Debe haber al menos una keyword";
+                return;
+            }
+
+            document.getElementById('keyword-score-warning').textContent = '';
+
+            var form_data = {
+                "title": document.getElementById("title").textContent,
+                'keywords': keywords,
+                'scores': scores
+            };
+
+            var jsonData = JSON.stringify(form_data);
+
+            console.log(jsonData)
+
+            document.body.appendChild(form);
+
+            // Create a hidden input field to hold the JSON data
+            var jsonDataInput = document.createElement('input');
+            jsonDataInput.type = 'hidden';
+            jsonDataInput.name = 'form_data';
+            jsonDataInput.value = jsonData;
+            form.appendChild(jsonDataInput);
+
+            // Submit the form
+            form.submit();
         }
     </script>
 </head>
 
 <body>
     <h1>Resultado Keywords</h1>
-    <p id="title" name="title">Título: {{title}}</p>
+    Título: <p id="title" name="title">{{ title }}</p> <br>
+    <strong>Keywords extraídas y sus scores</strong>
     <ul id="keywords-scores-list" style="list-style-type: none;">
         {% for keyword, score in keywords_scores %}
-        <li>{{ keyword }} - {{ score }}</li>
+        <li>
+            <span class="keyword">{{ keyword }}</span>
+            <span class="score">{{ score }}</span>
+            <button class="remove-btn" onclick="removeItem(this)">Quitar</button>
+        </li>
         {% endfor %}
     </ul>
-    <!-- Button to add a new list item -->
-    <button onclick="addItem()">Añadir keyword</button> <br><br>
-    <!-- <p id=" keywords" name="keywords">{{ keywords_result }}</p>
-        <p id="scores" name="scores">{{ scores }}</p> -->
-    <form action="{% url 'ranking_result' %}" method="post">
-        {% csrf_token %}
-        <input type="hidden" name="title" value="{{ title }}">
-        <input type="hidden" name="keywords" value="{{ keywords_result|join:',' }}">
-        <input type="hidden" name="scores" value="{{ scores|join:',' }}">
-
-        <input type="submit" value="Generar ranking docentes">
+    <form id="add-item-form" onsubmit="addItem(event)">
+        <input type="text" id="keyword-input" placeholder="Keyword">
+        <input type="text" id="score-input" placeholder="Score">
+        <button type="submit" id="add-btn">Añadir</button>
+        <span class="warning" id="keyword-score-warning"></span> <!-- Aviso -->
     </form>
+    <button onclick="sendUpdatedList()">Generar recomendación</button> <br><br>
+    <a href="/">Volver atrás</a>
 </body>
 
 </html>

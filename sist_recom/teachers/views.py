@@ -1,9 +1,8 @@
-import ast
-from django.http import HttpResponseRedirect
-from django.urls import reverse
+import json
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from teachers.utils.input_processing import extract_input_keywords
-from teachers.transformers.embeddings_download import (
+from teachers.transformers.embeddings_and_filtering import (
     teacher_ranking_keywords_approach,
 )
 
@@ -31,30 +30,33 @@ def keywords_result(request):
             },
         )
 
-        # return HttpResponseRedirect(
-        #     reverse("ranking_result"),
-        #     {"keywords_result": keywords_result, "scores": scores},
-        # )
-
     else:
         return redirect("/")
 
 
 def ranking_result(request):
     if request.method == "POST":
-        keywords = request.POST.get("keywords", "").split(",")
-        scores = request.POST.get("scores", "").split(",")
-        parsed_scores = [float(score) for score in scores]
-        # # top_n = request.POST.get("top_n", "")
-        title = request.POST.get("title", "")
+        try:
+            json_data = json.loads(request.POST["form_data"])
+        except json.JSONDecodeError as e:
+            return JsonResponse({"error": "Invalid JSON data"}, status=400)
 
-        # por ahora top_n hardcoded
-        teachers = teacher_ranking_keywords_approach(keywords, parsed_scores, 7)
+        title = json_data["title"]
+        keywords = json_data["keywords"]
+        scores = [float(score) for score in json_data["scores"]]
+
+        # top_n = request.POST.get("top_n", "")
+
+        teachers = teacher_ranking_keywords_approach(keywords, scores)
 
         return render(
             request,
             "ranking_result.html",
-            {"teachers": teachers[0].items(), "title": title},
+            {
+                "teachers": teachers[0].items(),
+                "title": title,
+                "works": teachers[1].items(),
+            },
         )
 
     else:

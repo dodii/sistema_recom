@@ -2,7 +2,7 @@ import requests
 from sist_recom.settings import UCAMPUS_USER, UCAMPUS_PASSWORD
 
 # Aquí van las requests a U-Campus
-# La request solo funciona desde la IP del servidor del DCC, que fue registrada
+# La request SOLAMENTE FUNCIONARÁ DESDE IP DE LA MÁQUINA VIRTUAL DEL DCC, que fue registrada
 # por U-Campus, junto con estas credenciales.
 
 # Estos son algunos de los endpoints.
@@ -13,7 +13,6 @@ academic_info_url = f"https://{UCAMPUS_USER}:{UCAMPUS_PASSWORD}@ucampus.uchile.c
 """
 Esta función obtiene todos los elementos relacionados al trabajo de cada docente.
 Entre estos hay publicaciones, memorias, cursos, etc.
-
 """
 
 

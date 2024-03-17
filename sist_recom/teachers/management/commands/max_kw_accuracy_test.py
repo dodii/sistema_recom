@@ -4,9 +4,9 @@ import time
 import datetime
 from teachers.models import Teacher
 from django.core.management.base import BaseCommand
-from teachers.transformers.translation_download import translate_es_en
+from sist_recom.teachers.transformers.translation_model import translate_es_en
 
-from teachers.transformers.embeddings_download import (
+from sist_recom.teachers.transformers.embeddings_and_filtering import (
     teacher_similarity_calculator,
 )
 
@@ -59,7 +59,7 @@ class Command(BaseCommand):
             # translated_content = translate_es_en(work_content)
 
             # Se pasa al extractor y se obtienen las keywords asociadas.
-            formatted_input = convert_input_format(translated_title)
+            formatted_input = convert_input_format(translated_title, abstract="")
             extractor_output = json.loads(transformation(formatted_input))
 
             tagged_concepts = extractor_output[0]["tags"]
