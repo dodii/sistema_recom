@@ -113,7 +113,9 @@ def teacher_similarity_calculator(
     return dict(islice(sorted_teacher_ranking, top_n_teachers))
 
 
-def teacher_ranking_keywords_approach(concepts_list, concepts_scores, top_n_teachers=7):
+def teacher_ranking_keywords_approach(
+    concepts_list, concepts_scores, top_n_teachers=7, test_flag=False
+):
     concepts_calculation_dict = {}
 
     for i, concept in enumerate(concepts_list):
@@ -135,7 +137,7 @@ def teacher_ranking_keywords_approach(concepts_list, concepts_scores, top_n_teac
                 # Las palabras que más se parecen tendrán más valor. A medida que disminuye el parecido,
                 # la ponderación disminuye siguiendo esta progresión geométrica.
                 # De esta forma, las keywords menos relevantes valen mucho menos.
-                pondered_distances[x] = (x.distance) * concept_score ** (i - 1)  # type: ignore
+                pondered_distances[x] = result  # type: ignore
 
         concepts_calculation_dict[concept] = pondered_distances
 
@@ -149,11 +151,12 @@ def teacher_ranking_keywords_approach(concepts_list, concepts_scores, top_n_teac
             if teacher_relationships:
                 for relationship in teacher_relationships:
                     related_teachers[relationship.teacher] = (
-                        related_teachers.get(relationship.teacher, 0)
+                        0
+                        if (
+                            test_flag == True and relationship.teacher.openalex_id == ""
+                        )
+                        else related_teachers.get(relationship.teacher, 0)
                         + score * relationship.score
-                        # if relationship.teacher.openalex_id
-                        # != ""  # Para testear sin docentes con keywords generadas por las memorias, evitando cruce de datos.
-                        # else 0
                     )
 
     # min max scaling

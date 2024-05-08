@@ -4,9 +4,9 @@ import time
 import datetime
 from django.core.management.base import BaseCommand
 from teachers.models import Teacher
-from sist_recom.teachers.transformers.translation_model import translate_es_en
+from teachers.transformers.translation_model import translate_es_en
 
-from sist_recom.teachers.transformers.embeddings_and_filtering import (
+from teachers.transformers.embeddings_and_filtering import (
     teacher_ranking_keywords_approach,
 )
 
@@ -58,14 +58,14 @@ class Command(BaseCommand):
 
             work_title = fall_2022["Tema"][i]
             print(work_title)
-            # work_content = fall_2022["Texto Propuesta"][i]
+            work_content = fall_2022["Texto Propuesta"][i]
 
             translated_title = translate_es_en(work_title)
-            # translated_content = translate_es_en(work_content)
+            translated_content = translate_es_en(work_content)
 
             # Se pasa al extractor y se obtienen las keywords asociadas.
-            # formatted_input = convert_input_format(translated_title, translated_content)
-            formatted_input = convert_input_format(translated_title, None)
+            formatted_input = convert_input_format(translated_title, translated_content)
+            # formatted_input = convert_input_format(translated_title, None)
             extractor_output = json.loads(transformation(formatted_input))
 
             tagged_concepts = extractor_output[0]["tags"]
@@ -79,7 +79,7 @@ class Command(BaseCommand):
             )
 
             teachers_courses_rank = teacher_ranking_keywords_approach(
-                tagged_concepts, scores, top_n
+                tagged_concepts, scores, top_n, test_flag=True
             )
 
             print(teachers_courses_rank[0])
@@ -110,14 +110,14 @@ class Command(BaseCommand):
 
             work_title = spring_2022["Tema"][i]
             print(work_title)
-            # work_content = spring_2022["Texto Propuesta"][i]
+            work_content = spring_2022["Texto Propuesta"][i]
 
             translated_title = translate_es_en(work_title)
-            # translated_content = translate_es_en(work_content)
+            translated_content = translate_es_en(work_content)
 
             # Se pasa al extractor y se obtienen las keywords asociadas.
-            # formatted_input = convert_input_format(translated_title, translated_content)
-            formatted_input = convert_input_format(translated_title, None)
+            formatted_input = convert_input_format(translated_title, translated_content)
+            # formatted_input = convert_input_format(translated_title, None)
             extractor_output = json.loads(transformation(formatted_input))
 
             tagged_concepts = extractor_output[0]["tags"]
@@ -131,7 +131,7 @@ class Command(BaseCommand):
             )
 
             teachers_courses_rank = teacher_ranking_keywords_approach(
-                tagged_concepts, scores, top_n
+                tagged_concepts, scores, top_n, test_flag=True
             )
 
             print(teachers_courses_rank[0])

@@ -7,8 +7,11 @@ db.sqlite3
 media
 
 # OpenAlex model
-/sist_recom/teachers/openalex_extractor/model_files
-/sist_recom/teachers/openalex_extractor/model_files.zip
+/sist_recom/teachers/openalex_extractor/model_files/*
+!/sist_recom/teachers/openalex_extractor/model_files/.gitkeep
+
+# gráficos tests informe
+/sist_recom/plots
 
 # BERT translate
 /sist_recom/teachers/transformers/sentence-transformers_paraphrase-multilingual-mpnet-base-v2

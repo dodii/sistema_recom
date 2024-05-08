@@ -93,7 +93,7 @@
 
             // Create a new list item with the key and value
             var newItem = document.createElement('li');
-            newItem.innerHTML = `<span class="keyword">${keyword}:</span> <span class="score">${score}</span> <button class="remove-btn" onclick="removeItem(this)">Quitar</button>`;
+            newItem.innerHTML = `<span class="keyword">${keyword}</span> <span class="score">${score}</span> <button class="remove-btn" onclick="removeItem(this)">Quitar</button>`;
             // Append the new list item to the unordered list
             document.getElementById('keywords-scores-list').appendChild(newItem);
             // Clear the input fields

@@ -34,6 +34,7 @@ class TeacherAdmin(admin.ModelAdmin):
         "get_memories",
         "get_works",
     ]
+    readonly_fields = ("openalex_id",)
 
     @admin.display(description="keywords")
     def get_keywords(self, obj):
