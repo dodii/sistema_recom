@@ -35,9 +35,9 @@ UCAMPUS_PASSWORD = env("UCAMPUS_PASSWORD")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["localhost", "sistrecomendacion.dcc.uchile.cl"]
 
-# CSRF_TRUSTED_ORIGINS = ["https://*.ngrok-free.app"]
+CSRF_TRUSTED_ORIGINS = ["https://sistrecomendacion.dcc.uchile.cl"]
 
 
 # Application definition
