@@ -16,6 +16,9 @@ media
 # BERT translate
 /sist_recom/teachers/transformers/sentence-transformers_paraphrase-multilingual-mpnet-base-v2
 
+# Datos sensibles docentes
+/sist_recom/openalex_teachers_id.json
+
 # Backup files # 
 *.bak 
 

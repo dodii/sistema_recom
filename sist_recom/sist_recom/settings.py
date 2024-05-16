@@ -35,7 +35,7 @@ UCAMPUS_PASSWORD = env("UCAMPUS_PASSWORD")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "sistrecomendacion.dcc.uchile.cl"]
+ALLOWED_HOSTS = ["localhost", "sistrecomendacion.dcc.uchile.cl", "localhost"]
 
 CSRF_TRUSTED_ORIGINS = ["https://sistrecomendacion.dcc.uchile.cl"]
 

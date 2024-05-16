@@ -4,6 +4,7 @@ from teachers.openalex_extractor.extractor_script import (
     convert_input_format,
     transformation,
 )
+from teachers.models import TeacherKeywordRelationship
 
 """
 La entrada está en texto plano, es traducida al inglés para que el extractor
@@ -25,3 +26,13 @@ def extract_input_keywords(title, content):
     scores = extractor_output[0]["scores"]
 
     return tagged_concepts, scores
+
+
+def get_profile_keywords(teachers):
+    return [
+        [
+            kw.keyword.keyword
+            for kw in TeacherKeywordRelationship.objects.filter(teacher=teacher)
+        ]
+        for teacher in teachers
+    ]

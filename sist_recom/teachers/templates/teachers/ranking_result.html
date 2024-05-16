@@ -31,25 +31,26 @@
         .tooltip {
             position: relative;
             display: inline-block;
-            border-bottom: 1px dotted black;
         }
 
         .tooltip .tooltiptext {
             visibility: hidden;
-            width: 120px;
+            width: 500px;
             color: black;
             text-align: center;
             border-radius: 6px;
             padding: 5px 0;
+
             position: absolute;
             z-index: 1;
             border: 3px solid black;
             bottom: 100%;
-            left: 50%;
+            left: 150%;
             margin-left: -60px;
             background-color: white;
             opacity: 0;
             transition: opacity 1s;
+            text-align: left;
         }
 
         .tooltip:hover .tooltiptext {
@@ -72,10 +73,22 @@
 <body>
     <h1>Recomendación de docentes</h1>
     <p id="title" name="title">Título: {{title}}</p>
-    <strong>Docentes</strong>
+    <strong>Ranking docentes y puntaje similitud</strong>
     <ul id="teachers_ranking" style="list-style-type: none;">
         {% for teacher, score in teachers %}
-        <li><span class="teacher">{{ teacher }}:</span> <span class="score">{{ score }}</span></li>
+        <li>
+            <div class="tooltip">
+                <span class="teacher"><a href="/admin/teachers/teacher/?q={{teacher}}" target="_blank">
+                        {{ forloop.counter }}. {{ teacher }}</a></span>
+                <span class="tooltiptext">
+                    <b>{{teacher}} - Keywords perfil: </b><br>
+                    {% for item in teachers_keywords|slice:forloop.counter|last %}
+                    {{item}} -
+                    {%endfor%}
+                </span>
+            </div>
+            <span class=" score">{{score}}</span>
+        </li>
         {% endfor %}
     </ul>
     <strong>Trabajos relacionados</strong>

@@ -1,7 +1,7 @@
 import json
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
-from teachers.utils.input_processing import extract_input_keywords
+from teachers.utils.input_processing import extract_input_keywords, get_profile_keywords
 from teachers.transformers.embeddings_and_filtering import (
     teacher_ranking_keywords_approach,
 )
@@ -49,6 +49,12 @@ def ranking_result(request):
 
         teachers = teacher_ranking_keywords_approach(keywords, scores)
 
+        teachers_keywords = get_profile_keywords(
+            [teacher[0] for teacher in teachers[0].items()]
+        )
+
+        print(teachers_keywords)
+
         return render(
             request,
             "ranking_result.html",
@@ -56,6 +62,7 @@ def ranking_result(request):
                 "teachers": teachers[0].items(),
                 "title": title,
                 "works": teachers[1].items(),
+                "teachers_keywords": teachers_keywords,
             },
         )
 

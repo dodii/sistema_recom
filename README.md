@@ -2,7 +2,7 @@
 
 Está construido con Django y PostgreSQL, junto a la extensión [pgvector](https://github.com/pgvector/pgvector-python) para almacenar vectores de word embeddings generados por el modelo multilenguaje [paraphrase multilingual mpnet base v2](https://huggingface.co/sentence-transformers/paraphrase-multilingual-mpnet-base-v2) de [Sentence Transformers](https://huggingface.co/sentence-transformers).
 
-Este proyecto utiliza el [modelo V2 de extracción de conceptos de OpenAlex](https://github.com/ourresearch/openalex-concept-tagging/tree/main) con [Tensorflow](https://www.tensorflow.org/install/pip?hl=es) para etiquetar con keywords las publicaciones, cursos, memorias guiadas, etc., que estén asociada a docentes. Luego, el modelo mpnet se encarga de crear los embeddings de estas palabras claves. 
+Este proyecto utiliza el [modelo V2 de extracción de conceptos de OpenAlex](https://github.com/ourresearch/openalex-concept-tagging/tree/main) con [Tensorflow](https://www.tensorflow.org/install/pip?hl=es) (2.15) para etiquetar con keywords las publicaciones, cursos, memorias guiadas, etc., que estén asociada a docentes. Luego, el modelo mpnet se encarga de crear los embeddings de estas palabras claves. 
 
 El modelo V2 puede ser descargado desde AWS, como describe su repositorio. Debe ser colocado y descomprimido dentro de sist_recom/teachers/openalex_extractor/model_files. El resto de elementos se descarga con Python dentro del proyecto mismo al ejecutar código.
 
@@ -20,10 +20,8 @@ Desde su API no se puede rescatar un grupo con docentes PEX, deben ser buscados 
 
 3. *openalex_info_setup.py*: Se llama a la API de OpenAlex para extraer las publicaciones académicas de los docentes, almacenando estos trabajos en la base de datos. 
 
-4. *ucampus_courses_thesis_setup.py*: Llamada a API de
-U-Campus para extraer cursos dictadps y memorias/tesis guiadas por cada docente del departamento.
+4. *ucampus_courses_thesis_setup.py*: Llamada a API de U-Campus para extraer cursos dictadps y memorias/tesis guiadas por cada docente del departamento.
 
-5. *courses_thesis_kw_setup.py*: Etiquetado de keywords
-con modelo V2 para los datos provenientes del script anterior.
+5. *courses_thesis_kw_setup.py*: Etiquetado de keywords con modelo V2 para los datos provenientes del script anterior.
 
 6. *final_keywords_setup.py*: 
