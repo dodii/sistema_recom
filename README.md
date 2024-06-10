@@ -25,3 +25,12 @@ Desde su API no se puede rescatar un grupo con docentes PEX, deben ser buscados 
 5. *courses_thesis_kw_setup.py*: Etiquetado de keywords con modelo V2 para los datos provenientes del script anterior.
 
 6. *final_keywords_setup.py*: 
+
+Otro script importante es *generate_list.py*, que toma un archivo excel con columnas que tengan el título y opcionalmente el resumen de un tema de memoria, y devuelve otro archivo excel con las recomendaciones para cada fila.
+
+Se utiliza dando como argumentos el path del archivo y el nombre de las columnas del título y resumen. Si no hay
+columna con resumen, por favor crear una dentro del archivo excel de entrada, aunque esté vacía para todas las filas.
+
+Ejemplo de uso: python manage.py generate_list excels/comisiones_ejemplo.xlsx Tema Resumen
+
+El script dejará el archivo en la carpeta excel_testing dentro del proyecto 
