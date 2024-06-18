@@ -45,7 +45,7 @@ class Command(BaseCommand):
                     {
                         "title": title,
                         "abstract": summary,
-                        "recommendation": teachers[0],
+                        "recommendation": [teacher.name for teacher in teachers[0]],
                     }
                 )
 

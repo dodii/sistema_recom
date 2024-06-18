@@ -23,7 +23,11 @@ def get_embeddings_of_model(list_of_keywords):
     return embeddings
 
 
-# obsoleto
+#################
+#
+# INTENTO OBSOLETO DE MALA CALIDAD
+#
+#################
 def teacher_similarity_calculator(
     concepts_list, concepts_scores, top_n_teachers, teachers_list
 ):
